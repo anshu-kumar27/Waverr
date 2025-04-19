@@ -47,5 +47,5 @@
 
 ## 🖼️ Screenshots
 
-### 🔍 Main Folder Operations
+### 🔍 Login page
 ![](assets/loginss.jpeg)
