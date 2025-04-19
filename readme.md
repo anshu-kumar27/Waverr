@@ -49,3 +49,11 @@
 
 ### 🔍 Login page
 ![](assets/loginss.jpeg)
+
+---
+
+<p align="center">
+  <img src="https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExcWEycmVyZzczN3BtaWl4ZHlqb2s5d2RqeXQ5ZWNvejRoeWVyYnd5ZSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/cvyz3Hw4d7EIw/giphy.gif" width="300" alt="anime-coding-gif"/>
+</p>
+
+<h3 align="center">✨ In progress... On my wayyyy.... ✨</h3>
