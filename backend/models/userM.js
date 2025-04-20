@@ -8,7 +8,7 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: [true, "Please enter your name"],
         maxLength: [30, "name should be under 30 chars"],
-        minLength: [4, "name should have more than 4 chars"]
+        minLength: [2, "name should have more than 4 chars"]
     },
     email: {
         type: String,
@@ -16,11 +16,18 @@ const userSchema = new mongoose.Schema({
         unique: true,
         validate: [validator.isEmail, "please enter a valid Email"]
     },
+    avatar:{
+        public_id:String,
+        url:String
+    },
     password: {
         type: String,
-        required: [true, "Please enter your password"],
         minLength: [8, 'password should have atleast 8 chars'],
-        select: false // whenever we use find method or try to get the information select fale will not display it
+        select: false, // whenever we use find method or try to get the information select fale will not display it
+        required: function () {
+            return !this.googleId && !this.appleId;
+          }
+        
     },
     role: {
         type: String,
@@ -48,7 +55,7 @@ userSchema.index({ appleId: 1 }, { unique: true, sparse: true });
 
 //hashing the passwords 
 userSchema.pre("save", async function (next) {
-    if (!this.isModified('password')) {
+    if (!this.isModified('password') || !this.password) {
         next();
     }
     this.password = await bcrypt.hash(this.password, 10);

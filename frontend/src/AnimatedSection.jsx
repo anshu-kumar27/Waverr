@@ -5,36 +5,36 @@ import { useInView } from "framer-motion";
 const AnimatedSection = ({ children, direction = "left" }) => {
   const controls = useAnimation();
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: false, margin: "-100px 0px" });
+  const isInView = useInView(ref, { once: true, margin: "-100px 0px" });
 
-  // Subtle scroll-based movement (barely 1px)
+  // Optional: slight parallax on scroll
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start end", "end start"],
   });
-  const y = useTransform(scrollYProgress, [0, 1], [0, 1]); // ⬅️ Subtle scroll effect
+  const y = useTransform(scrollYProgress, [0, 1], [0, 10]); // More visible scroll parallax
 
   useEffect(() => {
     if (isInView) {
       controls.start("visible");
-    } else {
-      controls.start("hidden");
     }
-  }, [isInView]);
+  }, [isInView, controls]);
 
   const variants = {
     hidden: {
       opacity: 0,
-      x: direction === "left" ? -5 : direction === "right" ? 5 : 0,
-      scale: direction === "center" ? 0.98 : 1,
+      x: direction === "left" ? -100 : direction === "right" ? 100 : 0,
+      y: direction === "center" ? 20 : 0,
+      scale: direction === "center" ? 0.95 : 1,
     },
     visible: {
       opacity: 1,
       x: 0,
+      y: 0,
       scale: 1,
       transition: {
-        duration: 0.3,
-        ease: "easeInOut",
+        duration: 0.6,
+        ease: "easeOut",
       },
     },
   };
@@ -42,12 +42,11 @@ const AnimatedSection = ({ children, direction = "left" }) => {
   return (
     <div className="overflow-hidden">
       <motion.div
-
         ref={ref}
         initial="hidden"
         animate={controls}
         variants={variants}
-        style={{ y }}
+        style={{ y: direction === "center" ? y : 0 }}
       >
         {children}
       </motion.div>
