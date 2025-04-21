@@ -9,7 +9,7 @@ const passport = require('passport');
 app.use(express.json())
 app.use(cookieParser())
 app.use(cors({
-    origin: 'http://localhost:3000', // Replace with your React app's URL
+    origin: 'http://localhost:5173',
     credentials: true,
     }));
 
@@ -19,7 +19,7 @@ app.use(cors({
         saveUninitialized: true,
         cookie: { secure: false }
     }));
-    require('./config/passport'); // after express-session, before routes
+    require('./config/passport');
     app.use(passport.initialize());
     app.use(passport.session());
 
@@ -27,8 +27,13 @@ app.use(cors({
 const users = require('./routes/userR');
 app.use('/api/v1',users)
 
-const googleAuthRoutes = require('./routes/authR'); // or whatever your file is
-app.use('/', googleAuthRoutes); // 👈 mounts all routes under /auth
+// google routes
+const googleAuthRoutes = require('./routes/authR');
+app.use('/', googleAuthRoutes); 
+
+// sidebar routes
+const sidebarRoutes = require('./routes/sidebarR');
+app.use('/api/v1',sidebarRoutes);
 
 //middleware for errors
 app.use(errorMiddleware);

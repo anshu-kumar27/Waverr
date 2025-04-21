@@ -1,11 +1,14 @@
+// env setup
 const dotenv = require('dotenv');
 dotenv.config({ path: './config/config.env' })
-const app = require('./app')
 const connectDatabase = require('./config/database')
 
+//conncting to the database
+connectDatabase()
+
+const {server}  = require('./config/socket')
+
 // handling uncaught exception
-
-
 process.on("uncaughtException", (err) => {
     console.log(`error: ${err.message}`);
     console.log(`shutting down the server due to uncaught exception error`);
@@ -13,11 +16,10 @@ process.on("uncaughtException", (err) => {
 })
 
 
-//conncting to the database
-connectDatabase()
+
 
 const PORT = process?.env?.PORT ?? 8080;
-const server = app.listen(PORT, () => {
+server.listen(PORT, () => {
     console.log(`server is working on http://localhost:${PORT}`)
 })
 

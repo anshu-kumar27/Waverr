@@ -1,7 +1,7 @@
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const UserM = require('../models/userM');
-
+const Profile = require("../models/profileM")
 passport.use(new GoogleStrategy({
     clientID: process.env.CLIENTID,
     clientSecret: process.env.CLIENTSECRET,
@@ -11,12 +11,15 @@ passport.use(new GoogleStrategy({
     try {
         console.log(profile._json);
         const { sub, email, name, picture } = profile._json;
+        const [firstName, ...lastNameParts] = name.split(' ');
+        const lastName = lastNameParts.join(' ');
 
         let user = await UserM.findOne({ googleId: sub });
 
         if (!user) {
             user = await UserM.create({
-                name,
+                firstName,
+                lastName,
                 email,
                 googleId: sub,
                     avatar: {
@@ -25,6 +28,14 @@ passport.use(new GoogleStrategy({
                     },
                 authProvider: 'google',
             });
+            await Profile.create({
+                user: user._id,
+                avatars: [
+                  {
+                    url: "https://in.pinterest.com/pin/63824519713555292/"
+                  }
+                ]
+              });
         }
 
         return done(null, user);

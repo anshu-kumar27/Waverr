@@ -4,11 +4,16 @@ const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const crypto = require('crypto')
 const userSchema = new mongoose.Schema({
-    name: {
+    firstName: {
         type: String,
         required: [true, "Please enter your name"],
         maxLength: [30, "name should be under 30 chars"],
-        minLength: [2, "name should have more than 4 chars"]
+        minLength: [1, "name should have more than 4 chars"]
+    },
+    lastName: {
+        type: String,
+        maxLength: [30, "name should be under 30 chars"],
+        minLength: [1, "name should have more than 4 chars"]
     },
     email: {
         type: String,
@@ -26,8 +31,7 @@ const userSchema = new mongoose.Schema({
         select: false, // whenever we use find method or try to get the information select fale will not display it
         required: function () {
             return !this.googleId && !this.appleId;
-          }
-        
+            }
     },
     role: {
         type: String,
@@ -37,16 +41,18 @@ const userSchema = new mongoose.Schema({
     googleId: {
         type: String,
         unique: true,
+        select : false,
         sparse: true // only index non-null values
     },
     appleId: {
         type: String,
         unique: true,
+        select : false,
         sparse: true
     },
     resetPasswordToken: String,
     resetPasswordExpire: Date,
-}, { timeStamp: true });
+}, { timestamps: true });
 
 //creating indexes
 userSchema.index({ email: 1 }, { unique: true });
