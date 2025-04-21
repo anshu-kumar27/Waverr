@@ -1,5 +1,8 @@
 import{ 
     CLEAR_ERRORS, 
+    FILTERED_USER_FAIL, 
+    FILTERED_USER_REQUEST, 
+    FILTERED_USER_SUCCESS, 
     LOAD_USER_FAIL, 
     LOAD_USER_REQUEST, 
     LOAD_USER_SUCCESS, 
@@ -81,7 +84,6 @@ export const logout = () => async(dispatch) =>{
     }
 }
 
-//8:50:11
 // update profile 
 export const updateProfile = (userData) => async(dispatch) =>{
     try{
@@ -90,6 +92,19 @@ export const updateProfile = (userData) => async(dispatch) =>{
         dispatch({type:UPDATE_PROFILE_SUCCESS,payload:data.user})
     }catch(error){
         dispatch({type:UPDATE_PROFILE_FAIL,payload:error.response.data.err})
+    }
+}
+
+// fetching all the user other than ourself // filtered user
+export const filterdUsers = () => async(dispatch)=>{
+    try{
+        dispatch({type:FILTERED_USER_REQUEST})
+        const {data} = await axios.get('/api/v1/allusers',{
+            credentials:'include'
+        })
+        dispatch({type:FILTERED_USER_SUCCESS,payload:data.filteredUsers})
+    }catch(error){
+        dispatch({type:FILTERED_USER_FAIL,payload:error.response.data.err})
     }
 }
 

@@ -16,14 +16,14 @@ exports.registerUser = catchAsync(async(req,res,next)=>{
         password,
         avatar:{
             public_id:"sampleId",
-            url:"https://in.pinterest.com/pin/63824519713555292/"
+            url:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR-wuYiRWzSyANZx8ccFY4sQvXkI_ve46_sAw&s"
         }
     })
     await Profile.create({
         user: user._id,
         avatars: [
           {
-            url: "https://in.pinterest.com/pin/63824519713555292/"
+            url: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR-wuYiRWzSyANZx8ccFY4sQvXkI_ve46_sAw&s"
           }
         ]
       });

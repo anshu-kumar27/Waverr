@@ -14,7 +14,10 @@ import{
     UPDATE_PROFILE_REQUEST,
     UPDATE_PROFILE_SUCCESS,
     LOGOUT_SUCCESS,
-    LOGOUT_FAIL
+    LOGOUT_FAIL,
+    FILTERED_USER_REQUEST,
+    FILTERED_USER_SUCCESS,
+    FILTERED_USER_FAIL
 } from '../constants/userConstants'
 
 export const userReducer = (state = { user: {} }, action) => {
@@ -110,6 +113,42 @@ export const userReducer = (state = { user: {} }, action) => {
             return state;
     }
 };
+
+let initialState = {
+    loading : true,
+    users: [],
+    error : null
+}
+
+export const filteredUser = (state = initialState, action)=>{
+    switch(action.type){
+        case FILTERED_USER_REQUEST:
+            return{
+                ...state,
+                loading:true
+            }
+        case FILTERED_USER_SUCCESS:
+            return{
+                ...state,
+                users:action.payload,
+                loading:false
+            }
+        case FILTERED_USER_FAIL:
+            return{
+                ...state,
+                users:null,
+                loading:false,
+                error:action.payload
+            }
+        case CLEAR_ERRORS:
+            return {
+                ...state,
+                error: null,
+            };
+        default:
+            return state;
+    }
+}
 
 
 export const profileReducer = (state = {},action)=>{

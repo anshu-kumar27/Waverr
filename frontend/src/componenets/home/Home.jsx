@@ -1,17 +1,24 @@
 import React from 'react'
 import Settings from './Settings'
-import Index from './sidebar/Index'
+import { zustandStore } from '../../zustand/zustand';
+import Message from '../midlayer/Message';
+import Group from '../midlayer/Group';
+import Call from '../midlayer/Call';
+import Globe from '../midlayer/Globe'
 
 function Home() {
+  const { activeTab } = zustandStore();
   return (
-    <div >
-      <div className='flex h-screen'>
+    <div className='w-full flex' >
+      <div className='flex h-screen w-[10%]'>
       <Settings/>
       </div>
     
-    {/*  i need settings to be fixed and the other components should change according to the url */}
     <div className="flex-1">
-      <Index/>
+    {activeTab === 'message' && <Message />}
+    {activeTab === 'globe' && <Globe />} 
+    {activeTab === 'phone' && <Call />}
+    {activeTab === 'group' && <Group />}
     </div>
     </div>
   )
