@@ -6,21 +6,21 @@ import MessageSkeleton from './messages/MessageSkeleton';
 
 
 function Message() {
-  const [userId, setUserId] = useState(null);
+  let [userId, setUserId] = useState(null);
   const dispatch = useDispatch();
 
   const { loading, users = [], error } = useSelector((state) => state.filterUsers);
-
+  
   // Fetch all users on mount
   useEffect(() => {
     dispatch(filterdUsers());
-    console.log(users)
   }, [dispatch]);
   console.log('message opened')
+  console.log("Redux: after LOGIN_SUCCESS or REGISTER_USER_SUCCESS");
   return (
     <div className="flex h-full">
       {/* Sidebar */}
-      <div className="w-[25%] h-full px-4 border-r border-gray-300 flex flex-col gap-4 overflow-auto">
+      <div className="w-[25%] h-full px-4 border-r border-gray-300  flex flex-col gap-4 overflow-auto">
       {/* Heading */}
       <h2 className="text-xl font-bold">Messages</h2>
 
@@ -65,6 +65,7 @@ function Message() {
           <div
             key={friend._id}
             className="flex items-center gap-3 p-1 rounded-lg hover:bg-gray-100 cursor-pointer transition"
+            onClick={() => setUserId(friend._id)}
           >
             <img
               src={friend.avatar.url}

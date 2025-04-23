@@ -9,6 +9,8 @@ const cloudinary = require('../config/cloudinary.js')
 exports.registerUser = catchAsync(async(req,res,next)=>{
 
     const {firstName,lastName,email,password} = req.body;
+    const isUser = await User.findOne({email:email});
+    if(isUser) return next(new ErrorHandler("user already exists",400))
     const user = await User.create({
         firstName,
         lastName,
@@ -32,7 +34,7 @@ exports.registerUser = catchAsync(async(req,res,next)=>{
 
 //login user
 exports.loginUser = catchAsync(async(req,res,next)=>{
-    console.log("we reached here ");
+    console.log("--- reached login user section ");
     const {email,password} =req.body;
 
     //checking if user has given password and mail both 

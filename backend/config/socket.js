@@ -33,8 +33,8 @@ io.on("connection", (socket) => {
     })
 })
 
-exports.getReceiverSocketId = (userId) =>{
+const getReceiverSocketId     = (userId) =>{
     return onlineUsers[userId];
 }
 
-module.exports = { io, server };
+module.exports = { io, server ,getReceiverSocketId};

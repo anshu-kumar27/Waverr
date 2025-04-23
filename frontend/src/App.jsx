@@ -9,11 +9,11 @@ import { useDispatch, useSelector } from 'react-redux';
 
 function App() {
   const dispatch = useDispatch();
-  // const { isAuthenticated ,user } = useSelector((state) => state.user)
-  // useEffect(() => {
-  //   console.log("User:", user); // check if null after logout
-  //   if (user) dispatch(loadUser());
-  // }, [user]);
+  const { isAuthenticated ,user } = useSelector((state) => state.user)
+  useEffect(() => {
+    if (!user) dispatch(loadUser());
+    console.log("User:", user); // check if null after logout
+  }, []);
   
   return (
         <>

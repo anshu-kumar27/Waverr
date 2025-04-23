@@ -98,12 +98,16 @@ export const updateProfile = (userData) => async(dispatch) =>{
 // fetching all the user other than ourself // filtered user
 export const filterdUsers = () => async(dispatch)=>{
     try{
+        console.log("filteredUsers reached")
         dispatch({type:FILTERED_USER_REQUEST})
         const {data} = await axios.get('/api/v1/allusers',{
             credentials:'include'
         })
+        console.log("this is the data while hitting the api : ",data.filteredUsers)
         dispatch({type:FILTERED_USER_SUCCESS,payload:data.filteredUsers})
+        
     }catch(error){
+        console.log("went inside error : ",error)
         dispatch({type:FILTERED_USER_FAIL,payload:error.response.data.err})
     }
 }

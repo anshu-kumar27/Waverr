@@ -1,12 +1,42 @@
 // env setup
 const dotenv = require('dotenv');
 dotenv.config({ path: './config/config.env' })
-const connectDatabase = require('./config/database')
 
+const connectDatabase = require('./config/database')
+const errorMiddleware = require('./middleware/error');
 //conncting to the database
 connectDatabase()
 
-const {server}  = require('./config/socket')
+const session = require('express-session');
+const passport = require('passport');
+
+const {server,app}  = require('./app')
+// Routes
+
+// Session & Passport
+app.use(session({
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: true,
+  cookie: { secure: false }
+}));
+require('./config/passport');
+app.use(passport.initialize());
+app.use(passport.session());
+
+
+const users = require('./routes/userR');
+const googleAuthRoutes = require('./routes/authR');
+const sidebarRoutes = require('./routes/sidebarR');
+const sendMessages = require('./routes/messageR');
+
+app.use('/api/v1', users);
+app.use('/', googleAuthRoutes);
+app.use('/api/v1', sidebarRoutes);
+app.use('/api/v1', sendMessages);
+
+// Error middleware
+app.use(errorMiddleware);
 
 // handling uncaught exception
 process.on("uncaughtException", (err) => {

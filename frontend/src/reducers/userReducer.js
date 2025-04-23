@@ -20,13 +20,22 @@ import{
     FILTERED_USER_FAIL
 } from '../constants/userConstants'
 
-export const userReducer = (state = { user: {} }, action) => {
+
+let userInitialState = {
+    loading : false,
+    isAuthenticated: false,
+    user: {},
+    error : null
+}
+
+export const userReducer = (state = userInitialState, action) => {
     switch (action.type) {
         // Auth Requests
         case LOGIN_REQUEST:
         case REGISTER_USER_REQUEST:
         case LOAD_USER_REQUEST:
             return {
+                ...state,
                 loading: true,
                 isAuthenticated: false,
             };
@@ -45,6 +54,7 @@ export const userReducer = (state = { user: {} }, action) => {
         // Logout Success
         case LOGOUT_SUCCESS:
             return {
+                ...state,
                 loading: false,
                 user: null,
                 isAuthenticated: false,
@@ -53,6 +63,7 @@ export const userReducer = (state = { user: {} }, action) => {
         // Auth Failures
         case LOAD_USER_FAIL:
             return {
+                ...state,
                 loading: false,
                 isAuthenticated: false,
                 user: null,
@@ -115,7 +126,7 @@ export const userReducer = (state = { user: {} }, action) => {
 };
 
 let initialState = {
-    loading : true,
+    loading : false,
     users: [],
     error : null
 }
@@ -151,48 +162,48 @@ export const filteredUser = (state = initialState, action)=>{
 }
 
 
-export const profileReducer = (state = {},action)=>{
-    switch(action.type){
-        case UPDATE_PROFILE_REQUEST:
-            return{
-                ...state,
-                loading:true,
-            }
-        case UPDATE_PROFILE_SUCCESS:
-            return{
-                ...state,
-                loading:false,
-                isUpdated:action.payload
-            }
-        case LOGOUT_SUCCESS:
-                return{
-                    loading:false,
-                    user:null,
-                    isAuthenticated:false,
-                }
-        case LOGOUT_FAIL:
-            return{
-                ...state,
-                loading:false,
-                error:action.payload,
-            }
-        case UPDATE_PROFILE_FAIL:
-            return{
-                ...state,
-                loading:false,
-                error:action.payload
-            }
-            case CLEAR_ERRORS:
-                return{
-                    ...state,
-                    error:null,
-                }
-            case UPDATE_PROFILE_RESET:
-                return{
-                    ...state,
-                    isUpdated:false,
-                };
-            default:
-                return state;
-    }
-}
+// export const profileReducer = (state = {},action)=>{
+//     switch(action.type){
+//         case UPDATE_PROFILE_REQUEST:
+//             return{
+//                 ...state,
+//                 loading:true,
+//             }
+//         case UPDATE_PROFILE_SUCCESS:
+//             return{
+//                 ...state,
+//                 loading:false,
+//                 isUpdated:action.payload
+//             }
+//         case LOGOUT_SUCCESS:
+//                 return{
+//                     loading:false,
+//                     user:null,
+//                     isAuthenticated:false,
+//                 }
+//         case LOGOUT_FAIL:
+//             return{
+//                 ...state,
+//                 loading:false,
+//                 error:action.payload,
+//             }
+//         case UPDATE_PROFILE_FAIL:
+//             return{
+//                 ...state,
+//                 loading:false,
+//                 error:action.payload
+//             }
+//             case CLEAR_ERRORS:
+//                 return{
+//                     ...state,
+//                     error:null,
+//                 }
+//             case UPDATE_PROFILE_RESET:
+//                 return{
+//                     ...state,
+//                     isUpdated:false,
+//                 };
+//             default:
+//                 return state;
+//     }
+// }

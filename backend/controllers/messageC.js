@@ -1,5 +1,5 @@
 const cloudinary = require("../config/cloudinary");
-const { getReceiverSocketId } = require("../config/socket");
+const { getReceiverSocketId, io } = require("../app") ;
 const catchAsync = require("../middleware/catchAsyncerrors");
 const Conversation = require('../models/conversationM')
 const Message = require('../models/messagesM');
@@ -7,7 +7,8 @@ const ErrorHandler = require("../utils/errorHandler");
 
 // supports one-to-one only right now
 exports.sendMessage = catchAsync(async(req,res,next)=>{
-  const { receiverId } = req.params;
+  const  { id: receiverId }  = req.params;
+
   const { text ='', image = '',type = '', isGroup = false, isCommunity = false } = req.body;
   if (!text && !image) {
     return next(new ErrorHandler("Message must contain text or image.",400))
@@ -24,7 +25,7 @@ exports.sendMessage = catchAsync(async(req,res,next)=>{
 
   //finding a conversation that includes both the users
   let conversation = await Conversation.findOne({
-    participants: { $all: [senderId, receiverId], $size: 2 },
+    participants: { $all: [senderId, receiverId] },
     isGroup: false,
     isCommunity:false
   });
@@ -59,14 +60,19 @@ exports.sendMessage = catchAsync(async(req,res,next)=>{
 })
 
 exports.getMessages = catchAsync(async(req,res,next)=>{
-  const recieverId = req.params.id;
+  const { id: receiverId }  = req.params;
   const senderId = req.user.id;
-
+  console.log(receiverId , senderId);
   const conversation = await Conversation.findOne({
-    participants: { $all : [senderId, recieverId]},
+    participants: { $all : [senderId, receiverId]},
     isGroup : false,
     isCommunity:false
   }).populate({path:'messages'})
+  // let conversation = await Conversation.findOne({
+  //   participants: { $all: [senderId, receiverId] },
+  //   isGroup: false,
+  //   isCommunity:false
+  // });
 
   if(!conversation) return res.status(200).json([]);;
 
