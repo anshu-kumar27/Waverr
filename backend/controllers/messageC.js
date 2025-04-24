@@ -4,11 +4,11 @@ const catchAsync = require("../middleware/catchAsyncerrors");
 const Conversation = require('../models/conversationM')
 const Message = require('../models/messagesM');
 const ErrorHandler = require("../utils/errorHandler");
+const User = require("../models/userM");
 
 // supports one-to-one only right now
 exports.sendMessage = catchAsync(async(req,res,next)=>{
   const  { id: receiverId }  = req.params;
-
   const { text ='', image = '',type = '', isGroup = false, isCommunity = false } = req.body;
   if (!text && !image) {
     return next(new ErrorHandler("Message must contain text or image.",400))
@@ -55,7 +55,18 @@ exports.sendMessage = catchAsync(async(req,res,next)=>{
   if (receiverSocketId && io) {
     io.to(receiverSocketId).emit("newMessage", message);
   }
-
+  await User.findByIdAndUpdate(req.user.id, {
+    userLastMessage: {
+      text: text ? text : "Attachment...",
+      createdAt: new Date()
+    }
+  });
+  await User.findByIdAndUpdate(receiverId, {
+    userLastMessage: {
+      text: text ? text : "Attachment...",
+      createdAt: new Date()
+    }
+  });
   res.status(201).json(message);
 })
 

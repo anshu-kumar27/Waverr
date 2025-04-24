@@ -52,6 +52,10 @@ const userSchema = new mongoose.Schema({
     },
     resetPasswordToken: String,
     resetPasswordExpire: Date,
+    userLastMessage: {
+        text: { type: String },
+        createdAt: { type: Date, default: Date.now }
+        }
 }, { timestamps: true });
 
 //creating indexes

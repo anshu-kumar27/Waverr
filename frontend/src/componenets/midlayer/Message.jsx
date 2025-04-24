@@ -13,7 +13,7 @@ function Message() {
   let [userName, setUserName] = useState(null);
   let [userAvatar, setUserAvatar] = useState(null);
   const {onlineUsers,socket} = useSocketContext()
-  const {activeTab} = zustandStore();
+  const {activeTab,messages,setMessages} = zustandStore();
   const[users,setUsers] = useState([]);
   useEffect(()=>{
     const func = async() =>{
@@ -23,14 +23,14 @@ function Message() {
             credentials:'include'
         })
         setUsers(data.filteredUsers);
-        
+        console.log("logging messages ",data.filteredUsers)
     }catch(error){
         console.log("went inside error : ",error)
         toast.error("error while fetching users")
     }
     }
     if(activeTab) func();
-  },[activeTab])
+  },[activeTab,messages,setMessages])
 
   return (
     <div className="flex h-full">
@@ -66,7 +66,7 @@ function Message() {
         {users.map((friend) => (
           <img
             key={friend._id}
-            src={friend.avatar.url}
+            src={friend?.avatar?.url ?? "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRdx7DtkyyncaSeB7amrICz1pnCZ4JhA_D3ag&s" }
             alt={friend.firstName}
             className="w-16 rounded-full border-2 border-blue-400 shrink-0"
           />
@@ -80,17 +80,22 @@ function Message() {
           <div
             key={friend._id}
             className="flex items-center gap-3 p-1 rounded-lg hover:bg-gray-100 cursor-pointer transition"
-            onClick={() => {setUserId(friend._id), setUserAvatar(friend.avatar.url), setUserName(friend.firstName)}}
+            onClick={() => {setUserId(friend._id), setUserAvatar(friend?.avatar?.url ?? "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRdx7DtkyyncaSeB7amrICz1pnCZ4JhA_D3ag&s"), setUserName(friend.firstName)}}
           >
             <img
-              src={friend.avatar.url}
+              src={friend?.avatar?.url ?? "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRdx7DtkyyncaSeB7amrICz1pnCZ4JhA_D3ag&s"}
               alt={friend.firstName}
               className="w-10 h-10 rounded-full"
             />
             <div>
-              <div className="font-semibold">{friend.firstName}</div>
-              <div className={`text-sm ${onlineUsers.includes(friend._id) ? 'text-green-500' : 'text-red-500'}`}>
-               {onlineUsers.includes(friend._id) ? "Online" : "Offline"}
+            <div className="flex items-center">
+        <div className="font-semibold">{friend.firstName}</div>
+        {onlineUsers.includes(friend._id) && (
+          <span className="ml-2 w-2.5 h-2.5 rounded-full bg-green-500"></span>
+        )}
+      </div>
+              <div className={`text-sm text-gray-500 truncate min-w-[100px]'}`}>
+               {friend?.userLastMessage?.text ?? '...'}
               </div>
             </div>
           </div>

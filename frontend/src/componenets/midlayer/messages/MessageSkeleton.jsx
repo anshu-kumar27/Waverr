@@ -13,24 +13,40 @@ import { toast } from 'react-toastify';
 import MessageBody from './MessageBody';
 import { handleSubmit } from '../../../action/messageAction';
 import { useSocketContext } from '../../../socket/socket';
+import { zustandStore } from '../../../zustand/zustand';
 
 function MessageSkeleton({ userId, userAvatar,  userName }) {
   const [loading,setLoading] = useState(false);
   const[text,setInput] = useState('');
   const[image,setImage] = useState(null);
   const[onlineStatus,setOnlineStatus] = useState("Offline")
+  const messages = zustandStore(state => state.messages);
+  const setMessages = zustandStore(state => state.setMessages);
+
   const {onlineUsers,socket} = useSocketContext()
-  const handleSend=()=>{
+  const handleSend=async()=>{
     console.log("inside handlesend")
-    if(!text && !image){
-      toast.error("Enter something before sending...")
-      console.log("no messages returning...")
-      return;
-  }
-    handleSubmit({text,image,userId});
-    // text,image,userId
-    setInput('');
-  }
+      if (!text && !image) {
+        toast.error("Enter something before sending...");
+        return;
+      }
+    
+      try {
+        const res = await axios.post(
+          `/api/v1/send/${userId}`,
+          { text, image },
+          { withCredentials: true }
+        );
+        const newMessage = res.data;
+        toast.success("Message sent");
+        setMessages([...messages, newMessage]); // This will now trigger reactivity
+        setInput('');
+        setImage(null)
+      } catch (error) {
+        toast.error("Failed to send the message");
+        console.error("Error:", error.message);
+      }
+    };
   useEffect(()=>{
     if(onlineUsers.includes(userId))
     setOnlineStatus("Online")
@@ -62,7 +78,7 @@ function MessageSkeleton({ userId, userAvatar,  userName }) {
       </div>
 
       {/* Messages */}
-      <div className="h-[66.3vh] overflow-y-auto">
+      <div className="h-[66.3vh] overflow-y-auto w-[100%]">
       <MessageBody
         userId = {userId}
         loading = {loading}

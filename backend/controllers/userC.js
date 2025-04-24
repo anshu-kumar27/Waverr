@@ -4,28 +4,31 @@ const catchAsync = require('../middleware/catchAsyncerrors');
 const sendToken = require('../utils/JWTtoken');
 // const sendEmail = require("../utils/sendEmail.js");
 const Profile = require("../models/profileM.js");
-const cloudinary = require('../config/cloudinary.js')
+const cloudinary = require('../config/cloudinary.js');
+const randomAvatarUrls = require("../config/randomUrls.js");
 //Register a user 
 exports.registerUser = catchAsync(async(req,res,next)=>{
 
     const {firstName,lastName,email,password} = req.body;
     const isUser = await User.findOne({email:email});
     if(isUser) return next(new ErrorHandler("user already exists",400))
+        const selectedAvatar = randomAvatarUrls[Math.floor(Math.random() * randomAvatarUrls.length)];
+
     const user = await User.create({
         firstName,
         lastName,
         email,
         password,
         avatar:{
-            public_id:"sampleId",
-            url:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR-wuYiRWzSyANZx8ccFY4sQvXkI_ve46_sAw&s"
+            public_id:"funky_avatar_" + Date.now(),
+            url:selectedAvatar
         }
     })
     await Profile.create({
         user: user._id,
         avatars: [
           {
-            url: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR-wuYiRWzSyANZx8ccFY4sQvXkI_ve46_sAw&s"
+            url: selectedAvatar
           }
         ]
       });

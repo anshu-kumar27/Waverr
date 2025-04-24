@@ -5,7 +5,9 @@ import { useEffect } from 'react';
 import { useSocketContext } from '../socket/socket';
 
 export const handleSubmit = async ({ text, image, userId }) => {
-  const { messages, setMessages } = zustandStore.getState(); 
+  const messages = zustandStore(state => state.messages);
+  const setMessages = zustandStore(state => state.setMessages);
+
 
   if (!text && !image) {
     toast.error("Enter something before sending...");

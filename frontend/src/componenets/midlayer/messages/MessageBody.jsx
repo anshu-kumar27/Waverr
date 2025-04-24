@@ -8,7 +8,7 @@ import axios from 'axios';
 // import { newMessageSocketListner } from '../../../action/messageAction';
 
 function MessageBody({userId ,userAvatar,  userName }) {
-    const {socket,onlineUsers} = useSocketContext();
+    const {socket} = useSocketContext();
     const {user} = useSelector((state)=>state.user);
     const[loading,setLoading] = useState(null);
     const {messages,setMessages} = zustandStore();
@@ -77,7 +77,7 @@ function MessageBody({userId ,userAvatar,  userName }) {
               <img src={image} alt="attachment" className="max-w-xs rounded-lg" />
             </div>
           )}
-          {text && <div className="chat-bubble bg-[#74D4FF]">{text}</div>}
+          {text && <div className="chat-bubble bg-[#74D4FF] break-words max-w-full whitespace-pre-wrap">{text}</div>}
           <div className="chat-footer opacity-50">{time}</div>
         </div>
       );
