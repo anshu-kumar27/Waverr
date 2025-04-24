@@ -23,7 +23,7 @@ export const handleSubmit = async ({ text, image, userId }) => {
     setMessages([...messages, newMessage]);
   } catch (error) {
     toast.error("Failed to send the message");
-    console.error("Error:", error);
+    console.error("Error:", error.message);
   }
 };
 

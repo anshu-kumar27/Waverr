@@ -6,6 +6,7 @@ import Home from './componenets/home/Home';
 import Errorpg from './componenets/error/Errorpg';
 import { loadUser } from './action/userAction';
 import { useDispatch, useSelector } from 'react-redux';
+import Globe from './componenets/midlayer/Globe';
 
 function App() {
   const dispatch = useDispatch();
@@ -22,6 +23,7 @@ function App() {
             <Routes>
             <Route path='/auth' element={<MainAuth />}/>
             <Route path='/' element={<Home />}/>
+            {/* <Route path='/globe' element={<Globe />}/> */}
 
             <Route path='*' element={<Errorpg />}/>
 

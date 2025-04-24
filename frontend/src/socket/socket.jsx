@@ -27,7 +27,7 @@ export const SocketContextProvider = ({children})=>{
             // for all online users
             socketInstance.on("getOnlineUsers",(users)=>{
                 setOnlineUsers(users)
-                console.log("users : ", users)
+                // console.log("users : ", users)
             })
             return () => {
                 socketInstance.disconnect();

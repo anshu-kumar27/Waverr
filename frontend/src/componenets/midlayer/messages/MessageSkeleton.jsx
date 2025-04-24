@@ -11,12 +11,15 @@ import {
 } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import MessageBody from './MessageBody';
-import { handleSubmit, newMessageSocketListner } from '../../../action/messageAction';
+import { handleSubmit } from '../../../action/messageAction';
+import { useSocketContext } from '../../../socket/socket';
 
 function MessageSkeleton({ userId, userAvatar,  userName }) {
   const [loading,setLoading] = useState(false);
   const[text,setInput] = useState('');
   const[image,setImage] = useState(null);
+  const[onlineStatus,setOnlineStatus] = useState("Offline")
+  const {onlineUsers,socket} = useSocketContext()
   const handleSend=()=>{
     console.log("inside handlesend")
     if(!text && !image){
@@ -26,7 +29,16 @@ function MessageSkeleton({ userId, userAvatar,  userName }) {
   }
     handleSubmit({text,image,userId});
     // text,image,userId
+    setInput('');
   }
+  useEffect(()=>{
+    if(onlineUsers.includes(userId))
+    setOnlineStatus("Online")
+    else
+    setOnlineStatus("Offline")
+
+    console.log("logger")
+  },[socket,userId])
   return (
     <div className="flex flex-col h-full">
       {/* Top Bar */}
@@ -39,7 +51,7 @@ function MessageSkeleton({ userId, userAvatar,  userName }) {
           />
           <div>
             <h3 className="font-semibold text-gray-800">{userName}</h3>
-            <p className="text-sm text-green-500">Online</p>
+            <p className={`text-sm ${onlineStatus === 'Online' ? 'text-green-500' : 'text-red-500'}`}>{onlineStatus}</p>
           </div>
         </div>
         <div className="flex gap-4 text-xl text-gray-600">

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import wavierrLogo from '../../assets/waverr.svg';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { logout } from '../../action/userAction';
 import {
@@ -17,7 +17,7 @@ function Settings() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { activeTab, setActiveTab } = zustandStore();
-
+  const {user} = useSelector((state)=>state.user);
   const handleLogout = () => {
     dispatch(logout());
     navigate('/auth');
@@ -33,12 +33,13 @@ function Settings() {
           <div className="flex flex-col gap-6 text-gray-600 text-2xl items-center mt-4">
             <div className="avatar">
               <div className="ring-primary ring-offset-base-100 w-16 rounded-full ring ring-offset-2">
-                <img src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp" />
+                <img src={user?.avatar?.url ?? "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR-wuYiRWzSyANZx8ccFY4sQvXkI_ve46_sAw&s"} />
               </div>
             </div>
             <FiGlobe
               className='hover:text-blue-500 cursor-pointer'
-              onClick={() => { setActiveTab('globe') }}
+              onClick={() => { setActiveTab('globe')}}
+              
             />
             <FiMessageCircle
               className='hover:text-blue-500 cursor-pointer'

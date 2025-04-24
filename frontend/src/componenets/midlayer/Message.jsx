@@ -4,6 +4,7 @@ import MessageSkeleton from './messages/MessageSkeleton';
 import axios from 'axios';
 import { zustandStore } from '../../zustand/zustand';
 import { toast } from 'react-toastify';
+import { useSocketContext } from '../../socket/socket';
 
 
 
@@ -11,11 +12,12 @@ function Message() {
   let [userId, setUserId] = useState(null);
   let [userName, setUserName] = useState(null);
   let [userAvatar, setUserAvatar] = useState(null);
-  const dispatch = useDispatch();
+  const {onlineUsers,socket} = useSocketContext()
   const {activeTab} = zustandStore();
   const[users,setUsers] = useState([]);
   useEffect(()=>{
     const func = async() =>{
+        
       try{
         const {data} = await axios.get('/api/v1/allusers',{
             credentials:'include'
@@ -29,7 +31,7 @@ function Message() {
     }
     if(activeTab) func();
   },[activeTab])
-  
+
   return (
     <div className="flex h-full">
       {/* Sidebar */}
@@ -87,8 +89,8 @@ function Message() {
             />
             <div>
               <div className="font-semibold">{friend.firstName}</div>
-              <div className="text-sm text-gray-600 truncate max-w-auto overflow-x-hidden ">
-                hello this was ur last message? {/* {friend.lastMessage} */}
+              <div className={`text-sm ${onlineUsers.includes(friend._id) ? 'text-green-500' : 'text-red-500'}`}>
+               {onlineUsers.includes(friend._id) ? "Online" : "Offline"}
               </div>
             </div>
           </div>

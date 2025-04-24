@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { extractTime } from './timehandler';
 import { useSelector } from 'react-redux';
 import { zustandStore } from '../../../zustand/zustand';
@@ -8,10 +8,12 @@ import axios from 'axios';
 // import { newMessageSocketListner } from '../../../action/messageAction';
 
 function MessageBody({userId ,userAvatar,  userName }) {
-    const {socket} = useSocketContext();
+    const {socket,onlineUsers} = useSocketContext();
     const {user} = useSelector((state)=>state.user);
     const[loading,setLoading] = useState(null);
     const {messages,setMessages} = zustandStore();
+    const lastMessageRef = useRef(null);
+
     useEffect(() => {
       const fetchMessages = async () => {
         try {
@@ -28,24 +30,37 @@ function MessageBody({userId ,userAvatar,  userName }) {
           setLoading(false);
         }
       };
-      //implement socket 
+      if (socket) {
+        socket.on("newMessage", (newMessage) => {
+          fetchMessages()
+        });
+  
+      }
       if (userId) {
         fetchMessages();
       }
+      // Cleanup the event listener on component unmount
+      return () => socket.off("newMessage");
     }, [userId,socket]);
+    useEffect(()=>{
+      console.log("useeffect called");
+      if (lastMessageRef.current) {
+        lastMessageRef.current.scrollIntoView({ behavior: "smooth" });
+      }
+    },[messages])
   return (
     <div className="flex-1 p-4 space-y-4">
-        {messages.map((message) => {
-          console.log("messages seems to be updated ")
+        {messages.map((message, index) => {
+          const isLast = index === messages.length - 1;
+
         const chatCorner = message.receiver !== userId ? "chat-start" : "chat-end";
         const name = message.receiver !== userId ? userName : user.firstName;
         const time = extractTime({ time: message.createdAt });
         const text = message?.content?.text ?? '';
         const avtr = message.receiver !== userId ? userAvatar : user.avatar.url;
         const image = message.content.image ?? '';
-
       return (
-        <div key={message._id} className={`chat ${chatCorner}`}>
+        <div key={message._id} className={`chat ${chatCorner}`} ref={isLast ? lastMessageRef : null} >
           <div className="chat-image avatar">
             <div className="w-10 rounded-full">
               <img
