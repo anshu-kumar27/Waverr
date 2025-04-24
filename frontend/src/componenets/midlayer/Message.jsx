@@ -8,9 +8,9 @@ import { toast } from 'react-toastify';
 
 
 function Message() {
-  let [userId, setUserId] = useState(null);   
-  let [userName, setUserName] = useState(null);   
-  let [userAvatar, setUserAvatar] = useState(null);   
+  let [userId, setUserId] = useState(null);
+  let [userName, setUserName] = useState(null);
+  let [userAvatar, setUserAvatar] = useState(null);
   const dispatch = useDispatch();
   const {activeTab} = zustandStore();
   const[users,setUsers] = useState([]);

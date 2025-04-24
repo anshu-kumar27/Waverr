@@ -7,7 +7,7 @@ import Call from '../midlayer/Call';
 import Globe from '../midlayer/Globe'
 
 function Home() {
-  const { activeTab } = zustandStore();
+  const { activeTab, setActiveTab } = zustandStore();
   return (
     <div className='w-full flex' >
       <div className='flex h-screen w-[10%]'>

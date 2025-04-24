@@ -11,42 +11,22 @@ import {
 } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import MessageBody from './MessageBody';
-import { handleSubmit } from '../../../action/messageAction';
+import { handleSubmit, newMessageSocketListner } from '../../../action/messageAction';
 
 function MessageSkeleton({ userId, userAvatar,  userName }) {
   const [loading,setLoading] = useState(false);
-  const [messages,setMessages] = useState([]);
   const[text,setInput] = useState('');
   const[image,setImage] = useState(null);
-
   const handleSend=()=>{
     console.log("inside handlesend")
-    handleSubmit(text,image,userId);
+    if(!text && !image){
+      toast.error("Enter something before sending...")
+      console.log("no messages returning...")
+      return;
   }
-
-  useEffect(() => {
-    const fetchMessages = async () => {
-      try {
-        setLoading(true);
-        const res = await axios.get(`/api/v1/messages/${userId}`, {
-          credentials:'include'
-        });
-        let data = res?.data?.messages ?? [];
-        setMessages(data)
-      } catch (error) {
-        console.log("error ",error)
-        toast.error("Error while fetching the conversation");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (userId) {
-      console.log("function called;;;")
-      fetchMessages();
-    }
-  }, [userId]); 
-
+    handleSubmit({text,image,userId});
+    // text,image,userId
+  }
   return (
     <div className="flex flex-col h-full">
       {/* Top Bar */}
@@ -73,7 +53,6 @@ function MessageSkeleton({ userId, userAvatar,  userName }) {
       <div className="h-[66.3vh] overflow-y-auto">
       <MessageBody
         userId = {userId}
-        messages = {messages}
         loading = {loading}
         userAvatar = {userAvatar}
         userName = {userName}

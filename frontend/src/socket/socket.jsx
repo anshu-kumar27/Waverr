@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import {useSelector} from 'react-redux'
+import io from 'socket.io-client'
 
 const SocketContext = createContext();
 
@@ -10,10 +11,11 @@ export const useSocketContext=()=>{
 export const SocketContextProvider = ({children})=>{
     const [socket,setSocket] = useState(null);
     const [onlineUsers,setOnlineUsers] = useState([])
-    const user = useSelector((state)=>state.user);
+    const {user} = useSelector((state)=>state.user);
 
     useEffect(()=>{
         if(user?._id){
+            console.log("socket connected ", user)
             const socketInstance = io("http://localhost:8080",{
                 query:{
                     userId : user._id
@@ -25,6 +27,7 @@ export const SocketContextProvider = ({children})=>{
             // for all online users
             socketInstance.on("getOnlineUsers",(users)=>{
                 setOnlineUsers(users)
+                console.log("users : ", users)
             })
             return () => {
                 socketInstance.disconnect();
