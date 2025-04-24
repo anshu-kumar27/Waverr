@@ -1,22 +1,35 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { filterdUsers } from '../../action/userAction';
 import MessageSkeleton from './messages/MessageSkeleton';
+import axios from 'axios';
+import { zustandStore } from '../../zustand/zustand';
+import { toast } from 'react-toastify';
 
 
 
 function Message() {
-  let [userId, setUserId] = useState(null);
+  let [userId, setUserId] = useState(null);   
+  let [userName, setUserName] = useState(null);   
+  let [userAvatar, setUserAvatar] = useState(null);   
   const dispatch = useDispatch();
-
-  const { loading, users = [], error } = useSelector((state) => state.filterUsers);
+  const {activeTab} = zustandStore();
+  const[users,setUsers] = useState([]);
+  useEffect(()=>{
+    const func = async() =>{
+      try{
+        const {data} = await axios.get('/api/v1/allusers',{
+            credentials:'include'
+        })
+        setUsers(data.filteredUsers);
+        
+    }catch(error){
+        console.log("went inside error : ",error)
+        toast.error("error while fetching users")
+    }
+    }
+    if(activeTab) func();
+  },[activeTab])
   
-  // Fetch all users on mount
-  useEffect(() => {
-    dispatch(filterdUsers());
-  }, [dispatch]);
-  console.log('message opened')
-  console.log("Redux: after LOGIN_SUCCESS or REGISTER_USER_SUCCESS");
   return (
     <div className="flex h-full">
       {/* Sidebar */}
@@ -65,7 +78,7 @@ function Message() {
           <div
             key={friend._id}
             className="flex items-center gap-3 p-1 rounded-lg hover:bg-gray-100 cursor-pointer transition"
-            onClick={() => setUserId(friend._id)}
+            onClick={() => {setUserId(friend._id), setUserAvatar(friend.avatar.url), setUserName(friend.firstName)}}
           >
             <img
               src={friend.avatar.url}
@@ -88,7 +101,11 @@ function Message() {
         {userId === null ? (
           <h1 className="text-2xl font-semibold text-gray-700">👋 Welcome! Select a user to start messaging.</h1>
         ) : (
-          <MessageSkeleton userId={userId} />
+          <MessageSkeleton 
+          userId={userId} 
+          userAvatar = {userAvatar}
+          userName = {userName}
+          />
         )}
       </div>
     </div>

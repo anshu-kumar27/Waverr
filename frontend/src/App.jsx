@@ -11,9 +11,9 @@ function App() {
   const dispatch = useDispatch();
   const { isAuthenticated ,user } = useSelector((state) => state.user)
   useEffect(() => {
-    if (!user) dispatch(loadUser());
+    dispatch(loadUser());
     console.log("User:", user); // check if null after logout
-  }, []);
+  }, [dispatch]);
   
   return (
         <>

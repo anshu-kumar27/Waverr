@@ -125,41 +125,41 @@ export const userReducer = (state = userInitialState, action) => {
     }
 };
 
-let initialState = {
-    loading : false,
-    users: [],
-    error : null
-}
+// let initialState = {
+//     loading : false,
+//     users: [],
+//     error : null
+// }
 
-export const filteredUser = (state = initialState, action)=>{
-    switch(action.type){
-        case FILTERED_USER_REQUEST:
-            return{
-                ...state,
-                loading:true
-            }
-        case FILTERED_USER_SUCCESS:
-            return{
-                ...state,
-                users:action.payload,
-                loading:false
-            }
-        case FILTERED_USER_FAIL:
-            return{
-                ...state,
-                users:null,
-                loading:false,
-                error:action.payload
-            }
-        case CLEAR_ERRORS:
-            return {
-                ...state,
-                error: null,
-            };
-        default:
-            return state;
-    }
-}
+// export const filteredUser = (state = initialState, action)=>{
+//     switch(action.type){
+//         case FILTERED_USER_REQUEST:
+//             return{
+//                 ...state,
+//                 loading:true
+//             }
+//         case FILTERED_USER_SUCCESS:
+//             return{
+//                 ...state,
+//                 users:action.payload,
+//                 loading:false
+//             }
+//         case FILTERED_USER_FAIL:
+//             return{
+//                 ...state,
+//                 users:null,
+//                 loading:false,
+//                 error:action.payload
+//             }
+//         case CLEAR_ERRORS:
+//             return {
+//                 ...state,
+//                 error: null,
+//             };
+//         default:
+//             return state;
+//     }
+// }
 
 
 // export const profileReducer = (state = {},action)=>{

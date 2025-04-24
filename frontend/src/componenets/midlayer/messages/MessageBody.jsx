@@ -1,59 +1,61 @@
 import React from 'react';
-
-import moment from 'moment';
-import { zustandStore } from '../../../zustand/zustand';
-import userGetConversations from '../../../action/messageAction';
-
-userGetConversations();
-function MessageBody({avatarUrl,userId }) {
-  const { selectedConversation,messages } = zustandStore();
-    
-
+import { extractTime } from './timehandler';
+import { useSelector } from 'react-redux';
+function MessageBody({userId , messages, loading,userAvatar,  userName }) {
+    const {user} = useSelector((state)=>state.user);
   return (
-    <div className="flex-1 overflow-y-auto p-4 space-y-4">
-      {messages && messages.length > 0 ? (
-        messages.map((msg) => {
-          const isIncoming = msg.receiver === selectedConversation;
-          const chatPosition = isIncoming ? 'chat-start' : 'chat-end';
-          const displayName = isIncoming ? 'Sender' : 'You';
-          const avatar = avatarUrl || "https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp";
+    <div className="flex-1 p-4 space-y-4">
+        {messages.map((message) => {
+      const chatCorner = message.receiver === userId ? "chat-start" : "chat-end";
+      const name = message.receiver === userId ? userName : user.firstName;
+      const time = extractTime({ time: message.createdAt });
+      const text = message?.content?.text ?? '';
+      const avtr = message.receiver === userId ? userAvatar : user.avatar.url;
+      const image = message.content.image ?? '';
 
-          return (
-            <div className={`chat ${chatPosition}`} key={msg._id}>
-              <div className="chat-image avatar">
-                <div className="w-10 rounded-full">
-                  <img alt="User avatar" src={avatar} />
-                </div>
-              </div>
-
-              <div className="chat-header">
-                {displayName}
-                <time className="text-xs opacity-50 ml-2">
-                  {moment(msg.createdAt).format('h:mm A')}
-                </time>
-              </div>
-
-              <div className="chat-bubble max-w-xs break-words">
-                {msg.type === 'image' && msg.content.image && (
-                  <img
-                    src={msg.content.image}
-                    alt="Sent content"
-                    className="rounded-lg mb-2 max-w-full"
-                  />
-                )}
-                {msg.content.text && <p>{msg.content.text}</p>}
-              </div>
-
-              <div className="chat-footer opacity-50">
-                {isIncoming ? 'Received' : 'Delivered'}
-              </div>
+      return (
+        <div key={message._id} className={`chat ${chatCorner}`}>
+          <div className="chat-image avatar">
+            <div className="w-10 rounded-full">
+              <img
+                alt="User avatar"
+                src={avtr}
+              />
             </div>
-          );
-        })
-      ) : (
-        <p className="text-center text-gray-500">No messages yet.</p>
-      )}
-    </div>
+          </div>
+            <div className="chat-header">
+            {name}
+          </div>
+          {image && (
+            <div className="chat-bubble">
+              <img src={image} alt="attachment" className="max-w-xs rounded-lg" />
+            </div>
+          )}
+          {text && <div className="chat-bubble">{text}</div>}
+
+          <div className="chat-footer opacity-50">{time}</div>
+        </div>
+      );
+    })}
+
+
+        {/* <div className="chat chat-end">
+          <div className="chat-image avatar">
+            <div className="w-10 rounded-full">
+              <img
+                alt="Tailwind CSS chat bubble component"
+                src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"
+              />
+            </div>
+          </div>
+          <div className="chat-header">
+            Anakin
+            <time className="text-xs opacity-50 ml-2">12:46</time>
+          </div>
+          <div className="chat-bubble">I hate you!</div>
+          <div className="chat-footer opacity-50">Seen at 12:46</div>
+        </div> */}
+      </div> 
   );
 }
 
