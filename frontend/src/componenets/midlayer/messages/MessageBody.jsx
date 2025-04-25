@@ -60,7 +60,7 @@ function MessageBody({userId ,userAvatar,  userName }) {
         const avtr = message.receiver !== userId ? userAvatar : user.avatar.url;
         const image = message.content.image ?? '';
       return (
-        <div key={message._id} className={`chat ${chatCorner}`} ref={isLast ? lastMessageRef : null} >
+        <div key={message._id} className={`chat ${chatCorner}`} ref={isLast ? lastMessageRef : null } style={{ width: '100%' }}>
           <div className="chat-image avatar">
             <div className="w-10 rounded-full">
               <img

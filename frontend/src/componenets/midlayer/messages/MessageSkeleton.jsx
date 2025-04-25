@@ -1,5 +1,5 @@
 import axios from 'axios';
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import {
   FiPhone,
   FiVideo,
@@ -14,47 +14,51 @@ import MessageBody from './MessageBody';
 import { handleSubmit } from '../../../action/messageAction';
 import { useSocketContext } from '../../../socket/socket';
 import { zustandStore } from '../../../zustand/zustand';
+import AddImage from './AddImage';
 
-function MessageSkeleton({ userId, userAvatar,  userName }) {
-  const [loading,setLoading] = useState(false);
-  const[text,setInput] = useState('');
-  const[image,setImage] = useState(null);
-  const[onlineStatus,setOnlineStatus] = useState("Offline")
+function MessageSkeleton({ userId, userAvatar, userName }) {
+
+  const [loading, setLoading] = useState(false);
+  const [text, setInput] = useState('');
+  const [image, setImage] = useState(null);
+  const [onlineStatus, setOnlineStatus] = useState("Offline")
   const messages = zustandStore(state => state.messages);
   const setMessages = zustandStore(state => state.setMessages);
 
-  const {onlineUsers,socket} = useSocketContext()
-  const handleSend=async()=>{
+  const { onlineUsers, socket } = useSocketContext()
+  const handleSend = async () => {
     console.log("inside handlesend")
-      if (!text && !image) {
-        toast.error("Enter something before sending...");
-        return;
-      }
-    
-      try {
-        const res = await axios.post(
-          `/api/v1/send/${userId}`,
-          { text, image },
-          { withCredentials: true }
-        );
-        const newMessage = res.data;
-        toast.success("Message sent");
-        setMessages([...messages, newMessage]); // This will now trigger reactivity
-        setInput('');
-        setImage(null)
-      } catch (error) {
-        toast.error("Failed to send the message");
-        console.error("Error:", error.message);
-      }
-    };
-  useEffect(()=>{
-    if(onlineUsers.includes(userId))
-    setOnlineStatus("Online")
+    if (!text && !image) {
+      toast.error("Enter something before sending...");
+      return;
+    }
+
+    try {
+      const res = await axios.post(
+        `/api/v1/send/${userId}`,
+        { text, image },
+        { withCredentials: true }
+      );
+      const newMessage = res.data;
+      toast.success("Message sent");
+      setMessages([...messages, newMessage]); // This will now trigger reactivity
+      setInput('');
+      setImage(null)
+    } catch (error) {
+      toast.error("Failed to send the message");
+      console.error("Error:", error.message);
+    }
+  };
+  useEffect(() => {
+    if (onlineUsers.includes(userId))
+      setOnlineStatus("Online")
     else
-    setOnlineStatus("Offline")
+      setOnlineStatus("Offline")
 
     console.log("logger")
-  },[socket,userId])
+  }, [socket, userId])
+
+  
   return (
     <div className="flex flex-col h-full">
       {/* Top Bar */}
@@ -79,19 +83,24 @@ function MessageSkeleton({ userId, userAvatar,  userName }) {
 
       {/* Messages */}
       <div className="h-[66.3vh] overflow-y-auto w-[100%]">
-      <MessageBody
-        userId = {userId}
-        loading = {loading}
-        userAvatar = {userAvatar}
-        userName = {userName}
-      />
+        <MessageBody
+          userId={userId}
+          loading={loading}
+          userAvatar={userAvatar}
+          userName={userName}
+        />
       </div>
       {/* Bottom Input Area */}
+      {image && (
+  <div className="mt-2">
+    <img src={selectedImage} alt="preview" className="max-w-xs rounded" />
+  </div>
+)}
       <div className="flex items-center gap-8 p-4 border-t border-gray-300">
         {/* Input Field */}
         <div className="flex flex-1 bg-[#74D4FF] rounded-full items-center px-4 py-2">
           <input
-            onChange={(e)=>setInput(e.target.value)}
+            onChange={(e) => setInput(e.target.value)}
             value={text}
             type="text"
             placeholder="Type a message"
@@ -101,13 +110,12 @@ function MessageSkeleton({ userId, userAvatar,  userName }) {
         </div>
 
         {/* Action Icons */}
-        <div className="flex gap-3 text-xl text-gray-600">
-          <FiPaperclip className="cursor-pointer" />
-          <FiSmile className="cursor-pointer" />
-          <FiFileText className="cursor-pointer" />
+        <FiPaperclip className="cursor-pointer text-gray-900" />
+        <FiSmile className="cursor-pointer text-gray-900" />
+          <FiFileText className="cursor-pointer text-gray-900" />
         </div>
       </div>
-    </div>
+
   );
 }
 

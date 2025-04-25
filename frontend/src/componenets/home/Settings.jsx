@@ -11,12 +11,16 @@ import {
   FiLogOut,
   FiSettings,
 } from 'react-icons/fi';
+import { FaPen } from "react-icons/fa";
+
 import { zustandStore } from '../../zustand/zustand';
+import ProfileEdit from './profile/ProfileEdit';
 
 function Settings() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { activeTab, setActiveTab } = zustandStore();
+  const [isProfileEdit,setProfileEdit] = useState(false);
   const {user} = useSelector((state)=>state.user);
   const handleLogout = () => {
     dispatch(logout());
@@ -32,9 +36,16 @@ function Settings() {
 
           <div className="flex flex-col gap-6 text-gray-600 text-2xl items-center mt-4">
             <div className="avatar">
-              <div className="ring-primary ring-offset-base-100 w-16 rounded-full ring ring-offset-2">
-                <img src={user?.avatar?.url ?? "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR-wuYiRWzSyANZx8ccFY4sQvXkI_ve46_sAw&s"} />
-              </div>
+            <div className="relative w-20 h-20 cursor-pointer p-[5.5px]" onClick={()=>setProfileEdit(true)}>
+      <img
+        src={user?.avatar?.url ?? "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR-wuYiRWzSyANZx8ccFY4sQvXkI_ve46_sAw&s"}
+        alt="avatar"
+        className="rounded-full ring ring-primary ring-offset-base-100 ring-offset-2"
+      />
+      <div className="absolute bottom-0 right-0 bg-primary p-1 rounded-full text-white">
+        <FaPen size={10} />
+      </div>
+    </div>
             </div>
             <FiGlobe
               className='hover:text-blue-500 cursor-pointer'
@@ -66,6 +77,7 @@ function Settings() {
           />
         </div>
       </div>
+        {isProfileEdit && <ProfileEdit isProfileEdit={isProfileEdit} setProfileEdit= {setProfileEdit}/>}
     </div>
   );
 
