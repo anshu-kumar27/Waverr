@@ -56,7 +56,7 @@ function MainAuth() {
   };
   useEffect(() => {
     if (error) {
-      toast.error(error);
+      // toast.error("");
       dispatch(clearErrors());
     }
     if (isAuthenticated) {

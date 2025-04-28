@@ -15,9 +15,10 @@ import { handleSubmit } from '../../../action/messageAction';
 import { useSocketContext } from '../../../socket/socket';
 import { zustandStore } from '../../../zustand/zustand';
 import AddImage from './AddImage';
+import CallingBody from '../calling/CallingBody';
 
 function MessageSkeleton({ userId, userAvatar, userName }) {
-
+  const [callStatus,setCallStatus] = useState(null); 
   const [loading, setLoading] = useState(false);
   const [text, setInput] = useState('');
   const [image, setImage] = useState(null);
@@ -75,12 +76,12 @@ function MessageSkeleton({ userId, userAvatar, userName }) {
           </div>
         </div>
         <div className="flex gap-4 text-xl text-gray-600">
-          <FiPhone className="cursor-pointer" />
-          <FiVideo className="cursor-pointer" />
+          <FiPhone className="cursor-pointer" onClick={()=> setCallStatus("audio")}/>
+          <FiVideo className="cursor-pointer" onClick={()=> setCallStatus("video")}/>
           <FiMoreVertical className="cursor-pointer" />
         </div>
       </div>
-
+      {callStatus &&  <CallingBody callStatus={callStatus} setCallStatus={setCallStatus} userAvatar={userAvatar} userId={userId}/>}
       {/* Messages */}
       <div className="h-[66.3vh] overflow-y-auto w-[100%]">
         <MessageBody

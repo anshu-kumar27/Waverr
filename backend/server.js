@@ -29,13 +29,15 @@ const users = require('./routes/userR');
 const googleAuthRoutes = require('./routes/authR');
 const sidebarRoutes = require('./routes/sidebarR');
 const sendMessages = require('./routes/messageR');
-const profiles = require('./routes/profileR')
+const profiles = require('./routes/profileR');
+const calls = require('./routes/callR');
 
 app.use('/api/v1', users);
 app.use('/', googleAuthRoutes);
 app.use('/api/v1', sidebarRoutes);
 app.use('/api/v1', sendMessages);
 app.use('/api/v1', profiles);
+app.use('/api/v1', calls);
 
 // Error middleware
 app.use(errorMiddleware);

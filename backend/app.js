@@ -1,11 +1,8 @@
-// server.js
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
-
-
 
 // Express app setup
 const app = express();
@@ -50,7 +47,7 @@ io.on("connection", (socket) => {
 // finding the online user socket id to send message via socket
 const getReceiverSocketId = (userId) => onlineUsers[userId];
 
-// Export getReceiverSocketId for other files like message controller
+
 module.exports = {
   io,
   server,

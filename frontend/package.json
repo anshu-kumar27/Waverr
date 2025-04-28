@@ -34,6 +34,7 @@
     "react-typed": "^2.0.12",
     "redux": "^5.0.1",
     "redux-thunk": "^3.1.0",
+    "simple-peer": "^9.11.1",
     "socket.io-client": "^4.8.1",
     "three": "^0.175.0",
     "vanta": "^0.5.24",

@@ -3,19 +3,17 @@ const passport = require('passport');
 const router = express.Router();
 const sendToken = require('../utils/JWTtoken');
 
-// Step 1: Redirect user to Google
+// redirecting to the google
 router.get('/google', passport.authenticate('google', {
   scope: ['profile', 'email']
 }));
 
-// Step 2: Callback URL handler
+//callback url once logged in
 router.get('/google/callback',
-  passport.authenticate('google', { failureRedirect: '/login' }),
+  passport.authenticate('google', { failureRedirect: '/auth' }),
   (req, res) => {
-    // Send JWT after successful login
+    // sending jwt after success
     sendToken(req.user, 200, res);
-    // res.redirect("http://localhost:5173/"); // optional: redirect to frontend
-
   }
 );
 
