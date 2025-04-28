@@ -7,18 +7,18 @@ import { toast } from 'react-toastify';
 import axios from 'axios';
 // import { newMessageSocketListner } from '../../../action/messageAction';
 
-function MessageBody({userId ,userAvatar,  userName }) {
+function MessageBody({userAvatar,  userName }) {
     const {socket} = useSocketContext();
     const {user} = useSelector((state)=>state.user);
     const[loading,setLoading] = useState(null);
     const {messages,setMessages} = zustandStore();
     const lastMessageRef = useRef(null);
-
+const selectedConversation = zustandStore(state => state.selectedConversation);
     useEffect(() => {
       const fetchMessages = async () => {
         try {
           setLoading(true);
-          const res = await axios.get(`/api/v1/messages/${userId}`, {
+          const res = await axios.get(`/api/v1/messages/${selectedConversation}`, {
             withCredentials: true,
           });
           const data = res?.data?.messages ?? [];
@@ -36,14 +36,13 @@ function MessageBody({userId ,userAvatar,  userName }) {
         });
   
       }
-      if (userId) {
+      if (selectedConversation) {
         fetchMessages();
       }
       // Cleanup the event listener on component unmount
       return () => socket.off("newMessage");
-    }, [userId,socket]);
+    }, [selectedConversation,socket]);
     useEffect(()=>{
-      console.log("useeffect called");
       if (lastMessageRef.current) {
         lastMessageRef.current.scrollIntoView({ behavior: "smooth" });
       }
@@ -53,11 +52,11 @@ function MessageBody({userId ,userAvatar,  userName }) {
         {messages.map((message, index) => {
           const isLast = index === messages.length - 1;
 
-        const chatCorner = message.receiver !== userId ? "chat-start" : "chat-end";
-        const name = message.receiver !== userId ? userName : user.firstName;
+        const chatCorner = message.receiver !== selectedConversation ? "chat-start" : "chat-end";
+        const name = message.receiver !== selectedConversation ? userName : user.firstName;
         const time = extractTime({ time: message.createdAt });
         const text = message?.content?.text ?? '';
-        const avtr = message.receiver !== userId ? userAvatar : user.avatar.url;
+        const avtr = message.receiver !== selectedConversation ? userAvatar : user.avatar.url;
         const image = message.content.image ?? '';
       return (
         <div key={message._id} className={`chat ${chatCorner}`} ref={isLast ? lastMessageRef : null } style={{ width: '100%' }}>

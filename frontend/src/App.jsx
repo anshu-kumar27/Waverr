@@ -27,13 +27,14 @@ function App() {
     if(!socket) return;
     socket.on('incomingCall',(callData)=>{
       setIncomingCall(callData)
+      console.log("this is the call data from app.jsx ",callData)
     })
 
     return () =>{
       socket.off('incomingCall')
     }
   },[socket])
-
+  console.log("the status of icoming call : ",incomingCall," and the status of oncall, ",onCall)  
   return (
         <>
         <div className="flex">

@@ -39,6 +39,7 @@ exports.startCall= catchAsyncerrors(async(req,res,next)=>{
     console.log("call started from ",userId," to : ",receiverId);
     const call = await CallHistory.create(callData)
     const user = await User.findById(userId).select('-password');
+    const receiver = await User.findById(receiverId).select('-password');
 
 
     // const userM = update the last message to call status;\\ 
@@ -49,6 +50,7 @@ exports.startCall= catchAsyncerrors(async(req,res,next)=>{
             callerDetails: user,
             startedAt: date,
             callDetails:call,
+            receiverDetails : receiver,
             receiverId:receiverId
         })
     }
@@ -58,20 +60,26 @@ exports.startCall= catchAsyncerrors(async(req,res,next)=>{
             endedAt: Date.now()
         });    
     }
-    res.status(200).json({success:true,message:"user,call send via socket",user,call})
+    res.status(200).json({
+        callFrom: userId,
+        callerDetails: user,
+        startedAt: date,
+        callDetails:call,
+        receiverDetails : receiver,
+        receiverId:receiverId
+    })
 })
 
 //handling rejected case
 exports.callReject = catchAsyncerrors(async(req,res,next)=>{
-    const {data} = req.body;
-    const currentTime = Date.now();
-    const durationMs = currentTime - new Date(data.startedAt); // duration in milliseconds
-    const duration = moment.utc(durationMs).format("mm:ss");
-
+    const {incomingCall  : data} = req.body;
+        const currentTime = Date.now();
+        const durationMs = currentTime - new Date(data.startedAt); // duration in milliseconds
+    
     const updatedCall = await CallHistory.findByIdAndUpdate(
-        data.callId,
+        data.callDetails._id,
         {
-            duration: duration,
+            duration: durationMs,
             endedAt: currentTime,
             status: 'rejected'
         },
@@ -84,9 +92,38 @@ exports.callReject = catchAsyncerrors(async(req,res,next)=>{
 })
 
 exports.callAccept = catchAsyncerrors(async(req,res,next)=>{
-    const {data} = req.body;
-    const socketId  = getReceiverSocketId(data.callFrom);
-    if(socketId && io)
-    io.to(socketId).emit("callAccepted",{data})
-    res.status(200).json({success:true,message:'call rejected',updatedCall})
+    try{
+        const {incomingCall  : data} = req.body;
+        const socketId  = getReceiverSocketId(data.callFrom);
+        if(socketId && io)
+        io.to(socketId).emit("callAccepted",{data})
+        res.status(200).json({success:true,message:'call accept'})
+    }catch(error){
+        console.log(error);
+    }
+})
+
+//handling ending cases
+exports.callEnd = catchAsyncerrors(async(req,res,next)=>{
+    const {incomingCall  : data} = req.body;
+    if(!data) return next(new ErrorHandler("no data to end a call",400))
+        const currentTime = Date.now();
+        const durationMs = currentTime - new Date(data.startedAt); // duration in milliseconds
+    
+    const updatedCall = await CallHistory.findByIdAndUpdate(
+        data.callDetails._id,
+        {
+            duration: durationMs,
+            endedAt: currentTime,
+            status: 'ended'
+        },
+        { new: true }
+    );
+    const senderSocketId = getReceiverSocketId(data.callFrom)
+    const receiverSocketId  = getReceiverSocketId(data.receiverId);
+    if(receiverSocketId && io)
+    io.to(receiverSocketId).emit("callEnd",{data})
+    if(senderSocketId && io)
+    io.to(senderSocketId).emit("callEnd",{data})
+    res.status(200).json({success:true,message:'call rejected',updatedCall,data})
 })

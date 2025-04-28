@@ -16,17 +16,27 @@ import { useSocketContext } from '../../../socket/socket';
 import { zustandStore } from '../../../zustand/zustand';
 import AddImage from './AddImage';
 import CallingBody from '../calling/CallingBody';
+import { useCall } from '../../../socket/Callcontext';
 
-function MessageSkeleton({ userId, userAvatar, userName }) {
-  const [callStatus,setCallStatus] = useState(null); 
+function MessageSkeleton({userId, userAvatar, userName }) {
+  const {callType,setCallType} = useCall(); 
   const [loading, setLoading] = useState(false);
   const [text, setInput] = useState('');
   const [image, setImage] = useState(null);
   const [onlineStatus, setOnlineStatus] = useState("Offline")
   const messages = zustandStore(state => state.messages);
   const setMessages = zustandStore(state => state.setMessages);
-
+  const setSelectedConversation = zustandStore(state => state.setSelectedConversation);
+  const selectedConversation = zustandStore(state => state.selectedConversation);
   const { onlineUsers, socket } = useSocketContext()
+  useEffect(() => {
+    setSelectedConversation(userId)
+    if (onlineUsers.includes(selectedConversation))
+      setOnlineStatus("Online")
+    else
+      setOnlineStatus("Offline")
+  }, [socket, userId])
+
   const handleSend = async () => {
     console.log("inside handlesend")
     if (!text && !image) {
@@ -36,7 +46,7 @@ function MessageSkeleton({ userId, userAvatar, userName }) {
 
     try {
       const res = await axios.post(
-        `/api/v1/send/${userId}`,
+        `/api/v1/send/${selectedConversation}`,
         { text, image },
         { withCredentials: true }
       );
@@ -50,15 +60,6 @@ function MessageSkeleton({ userId, userAvatar, userName }) {
       console.error("Error:", error.message);
     }
   };
-  useEffect(() => {
-    if (onlineUsers.includes(userId))
-      setOnlineStatus("Online")
-    else
-      setOnlineStatus("Offline")
-
-    console.log("logger")
-  }, [socket, userId])
-
   
   return (
     <div className="flex flex-col h-full">
@@ -76,16 +77,15 @@ function MessageSkeleton({ userId, userAvatar, userName }) {
           </div>
         </div>
         <div className="flex gap-4 text-xl text-gray-600">
-          <FiPhone className="cursor-pointer" onClick={()=> setCallStatus("audio")}/>
-          <FiVideo className="cursor-pointer" onClick={()=> setCallStatus("video")}/>
+          <FiPhone className="cursor-pointer" onClick={()=> setCallType("audio")}/>
+          <FiVideo className="cursor-pointer" onClick={()=> setCallType("video")}/>
           <FiMoreVertical className="cursor-pointer" />
         </div>
       </div>
-      {callStatus &&  <CallingBody callStatus={callStatus} setCallStatus={setCallStatus} userAvatar={userAvatar} userId={userId}/>}
+      {callType &&  <CallingBody/>}
       {/* Messages */}
       <div className="h-[66.3vh] overflow-y-auto w-[100%]">
         <MessageBody
-          userId={userId}
           loading={loading}
           userAvatar={userAvatar}
           userName={userName}

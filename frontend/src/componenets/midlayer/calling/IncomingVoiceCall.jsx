@@ -1,19 +1,21 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useCall } from '../../../socket/Callcontext';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { FaPhone, FaVideo } from 'react-icons/fa'; 
 function IncomingVoiceCall() {
-  const { incomingCall, setIncomingCall, setOnCall } = useCall();
-
+  const { incomingCall, setIncomingCall, setOnCall}  = useCall();
+  if (!incomingCall) return null; // safety check
   const handleAccept = async () => {
     try {
-      await axios.post('/api/v1/callAccept', { incomingCall }, {
+      await axios.put('/api/v1/callAccept', { incomingCall }, {
         credentials: 'include'
       });
+      console.log('successs...')
+      setIncomingCall(incomingCall);
       setOnCall(true);
     } catch (error) {
-      console.log(error);
+      console.log("an error while handling acceptance= ",error);
       toast.error(error.err)
       setOnCall(false);
     }
@@ -21,19 +23,19 @@ function IncomingVoiceCall() {
 
   const handleReject = async () => {
     try {
-      await axios.post('/api/v1/callReject', { incomingCall }, {
+      await axios.put('/api/v1/callReject', { incomingCall }, {
         credentials: 'include'
       });
       setOnCall(false);
       setIncomingCall(null);
+      setCallType(null);
     } catch (error) {
       console.log(error);
       toast.error(error.err)
       setOnCall(false);
     }
   };
-  console.log("the socket data : ", incomingCall)
-  if (!incomingCall) return null; // safety check
+  // console.log("the socket data : ", incomingCall)
 
   return (
     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">

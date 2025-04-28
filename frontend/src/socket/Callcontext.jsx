@@ -5,9 +5,10 @@ const CallContext = createContext();
 export const CallProvider = ({children}) =>{
     const [incomingCall , setIncomingCall] = useState(null)
     const [onCall , setOnCall] = useState(false)
+    const [callType,setCallType] = useState(null);
 
     return(
-        <CallContext.Provider value= {{incomingCall,setIncomingCall,onCall,setOnCall}}>{children}</CallContext.Provider>
+        <CallContext.Provider value= {{incomingCall,setIncomingCall,onCall,setOnCall,callType,setCallType}}>{children}</CallContext.Provider>
     )
 }
 

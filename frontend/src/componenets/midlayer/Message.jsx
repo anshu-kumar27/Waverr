@@ -5,6 +5,7 @@ import axios from 'axios';
 import { zustandStore } from '../../zustand/zustand';
 import { toast } from 'react-toastify';
 import { useSocketContext } from '../../socket/socket';
+// import { useCall } from '../../socket/Callcontext';
 
 
 
@@ -15,6 +16,7 @@ function Message() {
   const {onlineUsers,socket} = useSocketContext()
   const {activeTab,messages,setMessages} = zustandStore();
   const[users,setUsers] = useState([]);
+  const selectedConversation = zustandStore(state => state.selectedConversation);
   useEffect(()=>{
     const func = async() =>{
         
@@ -23,7 +25,7 @@ function Message() {
             credentials:'include'
         })
         setUsers(data.filteredUsers);
-        console.log("logging messages ",data.filteredUsers)
+        // console.log("logging messages ",data.filteredUsers)
     }catch(error){
         console.log("went inside error : ",error)
         toast.error("error while fetching users")
@@ -80,7 +82,7 @@ function Message() {
           <div
             key={friend._id}
             className="flex items-center gap-3 p-1 rounded-lg hover:bg-gray-100 cursor-pointer transition"
-            onClick={() => {setUserId(friend._id), setUserAvatar(friend?.avatar?.url ?? "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRdx7DtkyyncaSeB7amrICz1pnCZ4JhA_D3ag&s"), setUserName(friend.firstName)}}
+            onClick={() => {setUserId(friend._id) ,setUserAvatar(friend?.avatar?.url ?? "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRdx7DtkyyncaSeB7amrICz1pnCZ4JhA_D3ag&s"), setUserName(friend.firstName)}}
           >
             <img
               src={friend?.avatar?.url ?? "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRdx7DtkyyncaSeB7amrICz1pnCZ4JhA_D3ag&s"}
@@ -109,7 +111,7 @@ function Message() {
           <h1 className="text-2xl font-semibold text-gray-700">👋 Welcome! Select a user to start messaging.</h1>
         ) : (
           <MessageSkeleton 
-          userId={userId} 
+          userId = {userId}
           userAvatar = {userAvatar}
           userName = {userName}
           />
