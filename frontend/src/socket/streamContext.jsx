@@ -6,9 +6,11 @@ const CallStreamContext = createContext();
 export const StreamContext = ({children})=>{
     const [peer,setPeer] = useState(null);
     const [stream,setStream] = useState(null)
+    const [localStream,setLocalStream] = useState(null);
+    const [remoteStream,setRemoteStream] = useState(null);
 
     return(
-        <CallStreamContext.Provider value={{peer,setPeer,stream,setStream}}>{children}</CallStreamContext.Provider>
+        <CallStreamContext.Provider value={{peer,setPeer,stream,setStream,localStream,setLocalStream,remoteStream,setRemoteStream}}>{children}</CallStreamContext.Provider>
     )
 }
 

@@ -1,86 +1,138 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useRef, useState } from 'react';
 import { useCall } from '../../../socket/Callcontext';
 import axios from 'axios';
 import { toast } from 'react-toastify';
-import { FaPhone, FaVideo } from 'react-icons/fa'; 
-function IncomingVoiceCall() {
-  const { incomingCall, setIncomingCall, setOnCall}  = useCall();
+import { FaPhone, FaVideo } from 'react-icons/fa';
+import { useSocketContext } from '../../../socket/socket';
+import { useCallStream } from '../../../socket/streamContext';
+import Peer from 'simple-peer';
+
+function IncomingVoiceCall({pendingSignal, setPendingSignal}) {
+  const { incomingCall, setIncomingCall, setOnCall } = useCall();
+  const {
+    setStream,
+    setPeer,
+    setLocalStream,
+    setRemoteStream,
+  } = useCallStream();
+
+  const { socket } = useSocketContext();
+  // const peerRef = useRef(null);
+
   if (!incomingCall) return null; // safety check
+
+
   const handleAccept = async () => {
     try {
-      await axios.put('/api/v1/callAccept', { incomingCall }, {
-        credentials: 'include'
+      const callType = incomingCall?.callDetails?.type;
+      await axios.put(
+        '/api/v1/callAccept',
+        { incomingCall },
+        { withCredentials: true }
+      );
+      console.log("inside incoming call and pendingSignal is : ",pendingSignal)
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: callType !== 'audio',
+        audio: true,
       });
-      console.log('successs...')
-      setIncomingCall(incomingCall);
+
+      setLocalStream(stream);
+      setStream(stream);
+
+      const peer = new Peer({
+        initiator: false,
+        trickle: false,
+        stream: stream,
+      });
+
+      // peerRef.current = peer;
+      setPeer(peer);
+      peer.signal(pendingSignal) // responding back to the signal for handshake
+      peer.on('signal', (answerSignal) => {
+        socket.emit('returnSignal', {
+          to: incomingCall?.callerDetails?._id,
+          signal: answerSignal,
+          callType: callType,
+        });
+      });
+
+      peer.on('stream', (remoteStream) => {
+        setRemoteStream(remoteStream);
+      });
+
+      // Notify backend that call was accepted
+      
       setOnCall(true);
     } catch (error) {
-      console.log("an error while handling acceptance= ",error);
-      toast.error(error.err)
+      console.error("Error accepting call:", error);
+      toast.error("Could not accept the call.");
       setOnCall(false);
     }
   };
 
   const handleReject = async () => {
     try {
-      await axios.put('/api/v1/callReject', { incomingCall }, {
-        credentials: 'include'
-      });
-      setOnCall(false);
-      setIncomingCall(null);
-      setCallType(null);
+      setPendingSignal(null);
+      await axios.put(
+        '/api/v1/callReject',
+        { incomingCall },
+        { withCredentials: true }
+      );
     } catch (error) {
-      console.log(error);
-      toast.error(error.err)
+      console.error("Error rejecting call:", error);
+      toast.error("Failed to reject call.");
+    } finally {
+      // Cleanup
+      // peerRef.current = null;
+      setIncomingCall(null);
       setOnCall(false);
     }
   };
-  // console.log("the socket data : ", incomingCall)
+
 
   return (
     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
       <div className="relative bg-white rounded-lg w-[95%] max-w-5xl h-[80%] shadow-2xl p-6 flex flex-col justify-between items-center">
-        
+
         {/* User Avatar */}
         <div className="flex flex-col items-center mt-6">
           <img
-            src={incomingCall.callerDetails?.avatar?.url}
+            src={incomingCall?.callerDetails?.avatar?.url}
             alt="Caller Avatar"
             className="w-32 h-32 rounded-full object-cover mb-4"
           />
-          <h2 className="text-2xl font-bold">{incomingCall.callerDetails?.firstName  || 'Unknown Caller'}</h2>
+          <h2 className="text-2xl font-bold">
+            {incomingCall?.callerDetails?.firstName || 'Unknown Caller'}
+          </h2>
         </div>
 
         {/* Accept/Reject Buttons */}
         <div className="flex gap-6 mt-10">
-          {/* Accept Button */}
           <button
             onClick={handleAccept}
             className="bg-green-500 hover:bg-green-600 text-white rounded-full w-16 h-16 flex items-center justify-center text-xl"
           >
-{incomingCall?.callDetails?.type === 'audio' ? (
-  <FaPhone className="text-green-900 text-4xl" /> // Audio Call Icon
-) : (
-  <FaVideo className="text-blue-900 text-4xl" /> // Video Call Icon
-)}
+            {incomingCall?.callDetails?.type === 'audio' ? (
+              <FaPhone className="text-green-900 text-4xl" />
+            ) : (
+              <FaVideo className="text-blue-900 text-4xl" />
+            )}
           </button>
 
-          {/* Reject Button */}
           <button
             onClick={handleReject}
             className="bg-red-500 hover:bg-red-600 text-white rounded-full w-16 h-16 flex items-center justify-center text-xl"
           >
             {incomingCall?.callDetails?.type === 'audio' ? (
-  <FaPhone className="text-red-900 text-4xl" /> // Audio Call Icon
-) : (
-  <FaVideo className="text-red-900 text-4xl" /> // Video Call Icon
-)}
+              <FaPhone className="text-red-900 text-4xl" />
+            ) : (
+              <FaVideo className="text-red-900 text-4xl" />
+            )}
           </button>
         </div>
-
       </div>
     </div>
-  )
+  );
 }
 
 export default IncomingVoiceCall;

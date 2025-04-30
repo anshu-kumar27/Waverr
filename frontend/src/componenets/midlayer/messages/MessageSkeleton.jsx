@@ -17,10 +17,12 @@ import { zustandStore } from '../../../zustand/zustand';
 import AddImage from './AddImage';
 import CallingBody from '../calling/CallingBody';
 import { useCall } from '../../../socket/Callcontext';
-
+import { useCallStream } from '../../../socket/streamContext';
+import Peer from 'simple-peer'
 function MessageSkeleton({userId, userAvatar, userName }) {
   const {callType,setCallType} = useCall(); 
   const [loading, setLoading] = useState(false);
+  const { setStream, setPeer ,localStream,setLocalStream,remoteStream,setRemoteStream } = useCallStream();
   const [text, setInput] = useState('');
   const [image, setImage] = useState(null);
   const [onlineStatus, setOnlineStatus] = useState("Offline")
@@ -29,6 +31,9 @@ function MessageSkeleton({userId, userAvatar, userName }) {
   const setSelectedConversation = zustandStore(state => state.setSelectedConversation);
   const selectedConversation = zustandStore(state => state.selectedConversation);
   const { onlineUsers, socket } = useSocketContext()
+  const { setIncomingCall } = useCall();
+
+
   useEffect(() => {
     setSelectedConversation(userId)
     if (onlineUsers.includes(selectedConversation))
@@ -60,6 +65,49 @@ function MessageSkeleton({userId, userAvatar, userName }) {
       console.error("Error:", error.message);
     }
   };
+
+
+  const startCall = async ({type}) => {
+    try {
+      setCallType(type)
+      console.log("your call type is : ",type)
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: callType !== 'audio',
+        audio: true,
+      });
+      setLocalStream(stream);
+      setStream(stream);
+
+      const peer = new Peer({
+        initiator: true,
+        trickle: false,
+        stream: stream,
+      });
+
+      peer.on('signal', (data) => {
+        console.log('Sending offer signal from the caller');
+        socket.emit('sendSignal', {
+          to: selectedConversation,
+          signal: data,
+          callType: callType,
+        });
+      });
+
+      peer.on('stream', (remoteStream) => {
+        setRemoteStream(remoteStream)
+      });
+
+      // setCurrentPeer(peer); // why do we need this again ? shall i remote this since we are already settning setPeer(peer) don't you think its redundant ? 
+      setPeer(peer);
+
+      const callStarted = await axios.post(`/api/v1/callStart/${selectedConversation}`, { callType:type }, { credentials: 'include' });
+      console.log("Call started", callStarted.data);
+      setIncomingCall(callStarted.data);
+    } catch (error) {
+      console.error(error);
+      toast.error('Error starting call');
+    }
+  };
   
   return (
     <div className="flex flex-col h-full">
@@ -77,8 +125,8 @@ function MessageSkeleton({userId, userAvatar, userName }) {
           </div>
         </div>
         <div className="flex gap-4 text-xl text-gray-600">
-          <FiPhone className="cursor-pointer" onClick={()=> setCallType("audio")}/>
-          <FiVideo className="cursor-pointer" onClick={()=> setCallType("video")}/>
+          <FiPhone className="cursor-pointer" onClick={()=>startCall({type:"audio"})}/>
+          <FiVideo className="cursor-pointer" onClick={()=>startCall({type:"video"})}/>
           <FiMoreVertical className="cursor-pointer" />
         </div>
       </div>

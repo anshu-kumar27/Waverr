@@ -35,7 +35,7 @@ exports.handleProfileUpdate = catchAsyncerrors(async (req, res, next) => {
             console.log(err);
         }     
     }
-      
+
     const user = await User.findByIdAndUpdate(req.user.id, updateData, { new: true }).select('-password');
     // Prepare the Profile update object
     let profileUpdateData = {};

@@ -1,10 +1,13 @@
-// main.jsx or index.jsx
+// import { Buffer } from 'buffer'; 
+// window.Buffer = Buffer;
+// window.global = window;
+
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import { Provider } from 'react-redux';
 import store from './store';
-import './index.css'
+import './index.css';
 import { SocketContextProvider } from './socket/socket';
 import { CallProvider } from './socket/CallContext'; 
 import { BrowserRouter as Router } from 'react-router-dom';
@@ -16,10 +19,10 @@ ReactDOM.createRoot(document.getElementById('root')).render(
       <SocketContextProvider>
         <CallProvider>
           <StreamContext>
-        <Router>
-        <App />
-        </Router>
-        </StreamContext>
+            <Router>
+              <App />
+            </Router>
+          </StreamContext>
         </CallProvider>
       </SocketContextProvider>
     </Provider>

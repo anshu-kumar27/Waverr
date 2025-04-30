@@ -18,6 +18,8 @@ function App() {
   const {socket} = useSocketContext();
   const {setIncomingCall,incomingCall,onCall} = useCall()
   const { isAuthenticated ,user } = useSelector((state) => state.user)
+  const[pendingSignal, setPendingSignal] = useState(null);
+  // const[pendingCallType, setPendingCallType ] = useState(null);
   useEffect(() => {
     dispatch(loadUser());
     if(!isAuthenticated) navigate('/auth')
@@ -27,18 +29,24 @@ function App() {
     if(!socket) return;
     socket.on('incomingCall',(callData)=>{
       setIncomingCall(callData)
-      console.log("this is the call data from app.jsx ",callData)
     })
-
+    const handleReceiveSignal = ({ signal, callType }) => {
+        console.log('Received offer from caller but waiting for user to accept...',signal);
+          setPendingSignal(signal);
+          console.log("pending signal is : ",pendingSignal," or rather ",signal)
+      };
+      
+          socket.on('receiveSignal', handleReceiveSignal);
+    
     return () =>{
       socket.off('incomingCall')
+      socket.on('receiveSignal', handleReceiveSignal);
     }
   },[socket])
-  console.log("the status of icoming call : ",incomingCall," and the status of oncall, ",onCall)  
   return (
         <>
         <div className="flex">
-        {incomingCall && !onCall && <IncomingVoiceCall/>}
+        {incomingCall && !onCall && <IncomingVoiceCall pendingSignal={pendingSignal} setPendingSignal={setPendingSignal}/>}
         {incomingCall && onCall && <CallingBody/>}
         
             <Routes>

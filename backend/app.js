@@ -37,6 +37,20 @@ io.on("connection", (socket) => {
 
   io.emit('getOnlineUsers', Object.keys(onlineUsers));
 
+  socket.on("sendSignal",({to,signal,callType})=>{
+    console.log("sending a signal...",signal.type," to: ",to);
+    const sending = getReceiverSocketId(to);
+    console.log('gonna send to this socket it ',sending)
+    if(sending && io)
+    io.to(sending).emit("receiveSignal",{signal,callType})
+  })
+  socket.on("returnSignal", ({ to, signal, callType }) => {
+    const sending = getReceiverSocketId(to);
+    console.log('gonna return to this socket it ',sending)
+    io.to(sending).emit("finalSignal", { signal, callType });
+  });
+  
+
   socket.on("disconnect", () => {
     console.log("User disconnected:", socket.id);
     delete onlineUsers[userId];
