@@ -7,6 +7,8 @@ import Call from '../midlayer/Call';
 import Globe from '../midlayer/Globe'
 import { Bell, Search, Upload } from 'lucide-react';
 import { MdPersonAddAlt } from "react-icons/md";
+import Stories from './Stories';
+import Post from './Post';
 
 function Home() {
   const { activeTab, setActiveTab } = zustandStore();
@@ -32,37 +34,36 @@ function Home() {
     </div>
     
     {/* Divider */}
-    <div className="h-10 w-[2px] bg-gray-300 mx-2"></div>
+    <div className="h-10 w-[2px] bg-gray-0 mx-2"></div>
 
     {/* Add to Network */}
     <div className="hidden md:flex flex-col items-center justify-center text-sm font-medium text-gray-700">
-      <MdPersonAddAlt className="text-2xl mb-1" />
-      <span>Add to Network</span>
+      <span className="w-[5rem] mb-1"></span>
     </div>
   </div>
 </div>
 
-<div className="flex h-[100vh] ">
-<div className="flex flex-col md:flex-col w-full">
-  {/* LEFT: Stories or Sidebar */}
-  <div className="md:w-1/5 w-full bg-white p-4">
-    {/* Stories or Navigation */}
-    <p className="font-bold">Stories</p>
-    {/* map user stories here */}
+<div className="flex flex-col md:flex-row h-[92vh] md:h-[87vh] overflow-y-scroll custom-scrollbar">
+  {/* LEFT COLUMN */}
+  <div className="flex flex-col w-full md:w-[100%] bg-white overflow-hidden">
+    
+    {/* Fixed Stories Height */}
+    <div className="shrink-0">
+      <Stories />
+    </div>
+
+    {/* Scrollable Post Section */}
+    <div className="flex-1 overflow-y-auto custom-scrollbar shrink-0 ml-4 mr-4  p-2">
+      <Post />
+    </div>
+
   </div>
 
-  {/* CENTER: Posts */}
-  <div className="md:w-3/5 w-full p-4">
-    <p className="font-bold">Posts</p>
-    {/* map posts here */}
+  {/* RIGHT COLUMN - Suggestions */}
+  <div className="hidden md:block md:w-[40%] bg-white p-4">
+    <p className="font-bold mb-2">People you may know</p>
+    {/* Friend suggestions go here */}
   </div>
-  </div>
-  {/* RIGHT: Add to Network */}
-  <div className="md:w-1/5 w-full bg-white p-4 hidden md:block">
-    <p className="font-bold">People you may know</p>
-    {/* map friend suggestions */}
-  </div>
-
 </div>
     </>
   )

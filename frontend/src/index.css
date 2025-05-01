@@ -16,3 +16,12 @@ html {
         margin:0;
         padding:0;
     }
+
+    /* for nicer scroll experience */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 6px;
+  }
