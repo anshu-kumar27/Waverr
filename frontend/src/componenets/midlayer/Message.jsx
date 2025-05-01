@@ -17,9 +17,16 @@ function Message() {
   const {activeTab,messages,setMessages} = zustandStore();
   const[users,setUsers] = useState([]);
   const selectedConversation = zustandStore(state => state.selectedConversation);
+  const setSelectedConversation = zustandStore(state => state.setSelectedConversation);
+  const [selected, setSelected] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  useEffect(() => {
+    const handler = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handler);
+    return () => window.removeEventListener('resize', handler);
+  }, []);
   useEffect(()=>{
     const func = async() =>{
-        
       try{
         const {data} = await axios.get('/api/v1/allusers',{
             credentials:'include'
@@ -33,91 +40,101 @@ function Message() {
     }
     if(activeTab) func();
   },[activeTab,messages,setMessages])
-
+  const handleBack = () =>{
+    setSelectedConversation(null), 
+    setSelected(false)
+  }
   return (
-    <div className="flex h-full">
-      {/* Sidebar */}
-      <div className="w-[25%] h-full px-4 border-r border-gray-300  flex flex-col gap-4 overflow-auto">
-      {/* Heading */}
-      <h2 className="text-xl font-bold">Messages</h2>
+    <div className='h-full w-full flex'>
+      <div className={`
+      h-[100vh] px-4 border-r border-gray-300 flex flex-col gap-4 overflow-auto
+      ${selected ? 'hidden' : 'block'} 
+      md:block
 
-      {/* Search Bar */}
-      <div className="relative p-2 rounded-lg">
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-white"
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-    strokeWidth={2}
-  >
-    <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z" />
-  </svg>
-  <input
-    type="text"
-    placeholder="Search"
-    className="w-full pl-12 p-2 rounded-xl bg-[#74D4FF] outline-none text-white placeholder-white"
-  />
-</div>
-
-      {/* Line Separator */}
-      <div className="my-2 mx-4 h-[2px] bg-gray-300 rounded-full" />
-
-      {/* Avatars scrollable row */}
-      <div className="flex overflow-x-auto space-x-4 px-1">
-        {users.map((friend) => (
-          <img
-            key={friend._id}
-            src={friend?.avatar?.url ?? "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRdx7DtkyyncaSeB7amrICz1pnCZ4JhA_D3ag&s" }
-            alt={friend.firstName}
-            className="w-16 rounded-full border-2 border-blue-400 shrink-0"
+      md:w-[25%] w-full
+    `}>
+        {/* Heading */}
+        <div className="relative top-2">
+        <h2 className="text-xl font-bold ">Messages</h2>
+        </div>
+        {/* Search Bar */}
+        <div className="relative p-2 rounded-lg">
+          <input
+            type="text"
+            placeholder="Search"
+            className="w-full pl-12 p-2 rounded-xl bg-[#74D4FF] outline-none text-white placeholder-white"
           />
-        ))}
-      </div>
+        </div>
 
-      {/* Friends List */}
-      <div className=" space-y-3 pt-4 px-2 overflow-y-scroll overflow-x-hidden items-center justify-center" style={{ maxHeight: 'calc(100vh - 270px)', }}>
+        {/* Line */}
+        <div className="my-2 mx-4 h-[2px] bg-gray-300 rounded-full" />
 
-        {users.map((friend) => (
-          <div
-            key={friend._id}
-            className="flex items-center gap-3 p-1 rounded-lg hover:bg-gray-100 cursor-pointer transition"
-            onClick={() => {setUserId(friend._id) ,setUserAvatar(friend?.avatar?.url ?? "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRdx7DtkyyncaSeB7amrICz1pnCZ4JhA_D3ag&s"), setUserName(friend.firstName)}}
-          >
+        {/* Horizontal Avatars */}
+        <div className="flex overflow-x-auto space-x-4 px-1">
+          {users.map((friend) => (
             <img
-              src={friend?.avatar?.url ?? "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRdx7DtkyyncaSeB7amrICz1pnCZ4JhA_D3ag&s"}
+              key={friend._id}
+              src={friend?.avatar?.url ?? "default-url"}
               alt={friend.firstName}
-              className="w-10 h-10 rounded-full"
+              className="w-16 rounded-full border-2 border-blue-400 shrink-0"
             />
-            <div>
-            <div className="flex items-center">
-        <div className="font-semibold">{friend.firstName}</div>
-        {onlineUsers.includes(friend._id) && (
-          <span className="ml-2 w-2.5 h-2.5 rounded-full bg-green-500"></span>
-        )}
-      </div>
-              <div className={`text-sm text-gray-500 truncate min-w-[100px]'}`}>
-               {friend?.userLastMessage?.text ?? '...'}
+          ))}
+        </div>
+
+        {/* FRIENDS LIST */}
+        <div
+          className="space-y-3 pt-4 px-2 overflow-y-scroll overflow-x-hidden"
+          style={{ maxHeight: isMobile ? 'calc(100vh - 250px)' : 'calc(100vh - 200px)' }}
+        >
+          {users.map((friend) => (
+            <div
+              key={friend._id}
+              className="flex items-center gap-3 p-1 rounded-lg hover:bg-gray-100 cursor-pointer transition"
+              onClick={() => {
+                setUserId(friend._id);
+                setUserAvatar(friend?.avatar?.url ?? "default-url");
+                setUserName(friend.firstName);
+                setSelected(true); // show message area on mobile
+              }}
+            >
+              <img src={friend?.avatar?.url ?? "default-url"} className="w-10 h-10 rounded-full" />
+              <div>
+                <div className="flex items-center">
+                  <div className="font-semibold">{friend.firstName}</div>
+                  {onlineUsers.includes(friend._id) && (
+                    <span className="ml-2 w-2.5 h-2.5 rounded-full bg-green-500"></span>
+                  )}
+                </div>
+                <div className="text-sm text-gray-500 truncate min-w-[100px]">
+                  {friend?.userLastMessage?.text ?? '...'}
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
-    </div>
 
-      {/* Right panel */}
-      <div className="flex-1 p-6">
-        {userId === null ? (
-          <h1 className="text-2xl font-semibold text-gray-700">👋 Welcome! Select a user to start messaging.</h1>
-        ) : (
-          <MessageSkeleton 
-          userId = {userId}
-          userAvatar = {userAvatar}
-          userName = {userName}
-          />
-        )}
+    {/* MESSAGE AREA */}
+    {(userId !== null && selected) && (
+      <div className="w-full md:flex-1 p-6 block md:block g-[100vh]">
+        {/* Back Arrow - phone only */}
+        <div className="md:hidden mb-4 absolute top-2">
+          <button
+            onClick={() => handleBack()}
+            className="flex items-center text-blue-500 hover:text-blue-700"
+          >
+            ← Back to Messages
+          </button>
+        </div>
+
+        <MessageSkeleton
+          userId={userId}
+          userAvatar={userAvatar}
+          userName={userName}
+        />
       </div>
-    </div>
+    )}
+  </div>
   );
 }
 

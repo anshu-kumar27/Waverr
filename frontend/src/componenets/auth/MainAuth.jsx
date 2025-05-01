@@ -95,7 +95,7 @@ function MainAuth() {
         )}
       </div>
 
-      <ToastContainer position="top-center" autoClose={2500} />
+      <ToastContainer position="top-center" autoClose={2000} />
     </div>
   );
 }
