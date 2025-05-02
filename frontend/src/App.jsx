@@ -12,11 +12,12 @@ import IncomingVoiceCall from './componenets/midlayer/calling/IncomingVoiceCall'
 import { useCall } from './socket/Callcontext';
 import CallingBody from './componenets/midlayer/calling/CallingBody';
 import Settings from './componenets/home/Settings';
-import Globe from './componenets/midlayer/Globe';
 import Message from './componenets/midlayer/Message';
 import MainLayout from './MainLayout';
 import Group from './componenets/midlayer/Group';
 import Call from './componenets/midlayer/Call';
+import ShowProfile from './componenets/home/profile/ShowProfile';
+import UploadImage from './componenets/home/profile/UploadImage';
 
 function App() {
   const navigate = useNavigate();
@@ -61,6 +62,8 @@ function App() {
             <Route path='/message' element={<MainLayout><Message /></MainLayout>}/>
             <Route path='/call' element={<MainLayout><Call /></MainLayout>}/>
             <Route path='/group' element={<MainLayout><Group /></MainLayout>}/>
+            <Route path='/me' element={<MainLayout><ShowProfile /></MainLayout>}/>
+            <Route path='/me/post' element={<MainLayout><UploadImage /></MainLayout>}/>
             {/* <Route path='/globe' element={<Globe />}/> */}
 
             <Route path='*' element={<Errorpg />}/>

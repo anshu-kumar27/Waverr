@@ -13,8 +13,8 @@ import Post from './Post';
 function Home() {
   const { activeTab, setActiveTab } = zustandStore();
   return (
-    <>
-    <div className="w-full justify-between items-center p-4 border-b border-gray-200 md:flex hidden">
+    <div className='md:mt-4 mt-10'>
+    <div className="w-full justify-between items-center pl-4 pr-4 pb-4 border-b border-gray-200 md:flex hidden">
   {/* Left: Search */}
   <div className="relative w-1/3">
     <Search className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-500" />
@@ -43,9 +43,9 @@ function Home() {
   </div>
 </div>
 
-<div className="flex flex-col md:flex-row h-[92vh] md:h-[87vh] overflow-y-scroll custom-scrollbar">
+<div className="flex flex-col md:flex-row h-[87vh] md:h-[84vh] ">
   {/* LEFT COLUMN */}
-  <div className="flex flex-col w-full md:w-[100%] bg-white overflow-hidden">
+  <div className="flex flex-col w-full md:w-[100%] bg-white overflow-hidden overflow-y-scroll">
     
     {/* Fixed Stories Height */}
     <div className="shrink-0">
@@ -53,19 +53,18 @@ function Home() {
     </div>
 
     {/* Scrollable Post Section */}
-    <div className="flex-1 overflow-y-auto custom-scrollbar shrink-0 ml-4 mr-4  p-2">
+    <div className="flex-1 shrink-0 ml-4 mr-4  p-2">
       <Post />
     </div>
-
-  </div>
+    </div>
 
   {/* RIGHT COLUMN - Suggestions */}
-  <div className="hidden md:block md:w-[40%] bg-white p-4">
+  <div className="hidden md:block md:w-[40%] bg-white p-4 overflow-y-auto">
     <p className="font-bold mb-2">People you may know</p>
     {/* Friend suggestions go here */}
   </div>
 </div>
-    </>
+    </div>
   )
 }
 

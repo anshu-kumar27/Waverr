@@ -45,18 +45,17 @@ function Message() {
     setSelected(false)
   }
   return (
+    <div className='mt-10'>
     <div className='h-full w-full flex'>
       <div className={`
-      h-[100vh] px-4 border-r border-gray-300 flex flex-col gap-4 overflow-auto
+      h-[87vh] px-4 border-r border-gray-300 flex flex-col gap-4 overflow-auto
       ${selected ? 'hidden' : 'block'} 
+      md:h-[92vh]
       md:block
 
       md:w-[25%] w-full
     `}>
-        {/* Heading */}
-        <div className="relative top-2">
-        <h2 className="text-xl font-bold ">Messages</h2>
-        </div>
+        
         {/* Search Bar */}
         <div className="relative p-2 rounded-lg">
           <input
@@ -70,7 +69,7 @@ function Message() {
         <div className="my-2 mx-4 h-[2px] bg-gray-300 rounded-full" />
 
         {/* Horizontal Avatars */}
-        <div className="flex overflow-x-auto space-x-4 px-1">
+        <div className="flex overflow-x-auto space-x-4 px-1 custom-scrollbar">
           {users.map((friend) => (
             <img
               key={friend._id}
@@ -84,7 +83,7 @@ function Message() {
         {/* FRIENDS LIST */}
         <div
           className="space-y-3 pt-4 px-2 overflow-y-scroll overflow-x-hidden"
-          style={{ maxHeight: isMobile ? 'calc(100vh - 250px)' : 'calc(100vh - 200px)' }}
+          style={{ maxHeight: isMobile ? 'calc(100vh - 300px)' : 'calc(100vh - 200px)' }}
         >
           {users.map((friend) => (
             <div
@@ -134,6 +133,7 @@ function Message() {
         />
       </div>
     )}
+  </div>
   </div>
   );
 }

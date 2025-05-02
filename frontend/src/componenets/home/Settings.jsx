@@ -22,13 +22,10 @@ import { FaPen } from "react-icons/fa";
 
 
 import { zustandStore } from "../../zustand/zustand";
-import ProfileEdit from "./profile/ProfileEdit";
 
 function Settings() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { activeTab, setActiveTab } = zustandStore();
-  const [isProfileEdit, setProfileEdit] = useState(false);
   const { user } = useSelector((state) => state.user);
   const [menuOpen, setMenuOpen] = useState(false);
   const toggleMenu = () => setMenuOpen(!menuOpen);
@@ -72,7 +69,7 @@ useEffect(() => {
               <div className="avatar">
                 <div
                   className="relative w-20 h-20 cursor-pointer p-[5.5px]"
-                  onClick={() => setProfileEdit(true)}
+                  onClick={() => navigate('/me')}
                 >
                   <img
                     src={
@@ -116,12 +113,6 @@ useEffect(() => {
             />
           </div>
         </div>
-        {isProfileEdit && (
-          <ProfileEdit
-            isProfileEdit={isProfileEdit}
-            setProfileEdit={setProfileEdit}
-          />
-        )}
       </div>
       <div className="md:hidden absolute top-4 right-4 z-50">
         <button onClick={toggleMenu}>
@@ -156,7 +147,10 @@ useEffect(() => {
               {" "}
               <div
                 className="w-20 h-20 cursor-pointer"
-                onClick={() => setProfileEdit(true)}
+                onClick={() => {
+                  navigate('/me');
+                  toggleMenu();
+                }}
               >
                 <img
                   src={

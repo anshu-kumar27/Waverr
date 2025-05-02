@@ -20,8 +20,7 @@ function Stories() {
   ]
   
   return (
-    <div className="w-full py-4 px-2 inline-block mr-2">
-      <div className="ml-2 mb-2 font-medium">Stories</div>
+    <div className="w-full pb-4 px-2 inline-block mr-2 mt-5">
       <div className="flex h-[100px] sm:h-[120px] md:h-[140px]">
         {/* Fixed left section */}
         <div className="flex flex-col items-center justify-center px-3 shrink-0">

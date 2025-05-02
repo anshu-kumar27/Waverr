@@ -38,13 +38,13 @@ function Post() {
           </div>
 
           {/* Post Image */}
-          <div className="w-full max-h-[500px] overflow-hidden">
-            <img
-              src={item.post}
-              alt="post"
-              className="w-full h-auto object-cover rounded-b-lg"
-            />
-          </div>
+          <div className="w-full aspect-[3/2] overflow-hidden">
+  <img
+    src={item.post}
+    alt="post"
+    className="w-full h-full object-cover"
+  />
+</div>
 
           {/* Action Buttons */}
           <div className="flex justify-between items-center px-4 py-2">

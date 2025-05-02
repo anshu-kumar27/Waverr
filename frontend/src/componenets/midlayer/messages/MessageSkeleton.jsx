@@ -110,9 +110,9 @@ function MessageSkeleton({userId, userAvatar, userName }) {
   };
   
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-[81vh] md:h-[85vh]">
       {/* Top Bar */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-300">
+      <div className="flex items-center justify-between border-b border-gray-300">
         <div className="flex items-center gap-3">
           <img
             className="w-10 h-10 rounded-full"
