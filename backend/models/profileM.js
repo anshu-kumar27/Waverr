@@ -22,7 +22,7 @@ const profileSchema = new mongoose.Schema({
       },
       status:{
         type : String,
-        enum : ['pending','accepted','rejected'],
+        enum : ['pending','accepted','rejected','removed'],
         default : 'pending'
       },
       requestedAt: {
@@ -62,6 +62,14 @@ const profileSchema = new mongoose.Schema({
     type: String,
     enum: ['male', 'female', 'other'],
     default: 'other'
+  },
+  story:{
+    type: String,
+  },
+  statusText:{
+    type:String,
+    minLength: [1, 'Status must be at least 1 character long.'],
+    maxLength: [20, 'Status cannot exceed 20 characters.']
   },
   profileVisibility: {
     type: String,

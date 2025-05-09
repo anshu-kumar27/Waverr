@@ -18,20 +18,41 @@ import Group from './componenets/midlayer/Group';
 import Call from './componenets/midlayer/Call';
 import ShowProfile from './componenets/home/profile/ShowProfile';
 import UploadImage from './componenets/home/profile/UploadImage';
+import Loading from './loading/Loading';
+import { UseNotification } from './socket/Notification';
 
 function App() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const {socket} = useSocketContext();
   const {setIncomingCall,incomingCall,onCall} = useCall()
-  const { isAuthenticated } = useSelector((state) => state.user)
+  const {isAuthenticated } = useSelector((state) => state.user)
   const[pendingSignal, setPendingSignal] = useState(null);
-  const location = useLocation();
-  const isLocated = location.pathname.includes('/auth')
+  const [loading,setLoading] = useState(false);
+  const {setNotification} = UseNotification()
   useEffect(() => {
-    dispatch(loadUser());
-    if(!isAuthenticated) navigate('/auth')
+    const fetchUser = async () => {
+      setLoading(true);
+      try {
+        await dispatch(loadUser());
+      } catch (error) {
+        console.log('User not authenticated');
+      } finally {
+        setTimeout(() => {
+          setLoading(false);
+        }, 1000);
+      }
+    };
+  
+    fetchUser();
   }, [dispatch]);
+  
+  useEffect(() => {
+    if (!loading && !isAuthenticated) {
+      navigate('/auth');
+    }
+  }, [isAuthenticated]);
+  
   
   useEffect(()=>{
     if(!socket) return;
@@ -44,16 +65,28 @@ function App() {
           console.log("pending signal is : ",pendingSignal," or rather ",signal)
       };
       
+      const handleNewReq = (data) => {
+        console.log('got a new notification',data);
+        setNotification(Date.now());
+      }
+      const handleRemoveReq = (data) => {
+        console.log('removed a notification',data);
+        setNotification(Date.now());
+      }
           socket.on('receiveSignal', handleReceiveSignal);
+          socket.on('removeReq', handleRemoveReq)
+          socket.on('newReq', handleNewReq)
     
     return () =>{
       socket.off('incomingCall')
-      socket.on('receiveSignal', handleReceiveSignal);
+      socket.off('receiveSignal');
+      socket.off('removeReq')
+      socket.off('newReq')
     }
   },[socket])
   return (
         <>
-        <div className="flex">
+        {loading ? <div className='h-[100vh] flex-1'> <Loading/> </div>: (<div className="flex">
         {incomingCall && !onCall && <IncomingVoiceCall pendingSignal={pendingSignal} setPendingSignal={setPendingSignal}/>}
         {incomingCall && onCall && <CallingBody/>}
             <Routes>
@@ -70,7 +103,8 @@ function App() {
 
 
             </Routes>
-            </div>
+            </div>)}
+        
         </>
   )
 }

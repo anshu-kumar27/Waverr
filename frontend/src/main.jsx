@@ -12,6 +12,7 @@ import { SocketContextProvider } from './socket/socket';
 import { CallProvider } from './socket/CallContext'; 
 import { BrowserRouter as Router } from 'react-router-dom';
 import { StreamContext } from './socket/streamContext';
+import { NotificationProvider } from './socket/Notification';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
@@ -19,9 +20,11 @@ ReactDOM.createRoot(document.getElementById('root')).render(
       <SocketContextProvider>
         <CallProvider>
           <StreamContext>
-            <Router>
-              <App />
-            </Router>
+            <NotificationProvider>
+              <Router>
+                <App />
+              </Router>
+            </NotificationProvider>
           </StreamContext>
         </CallProvider>
       </SocketContextProvider>

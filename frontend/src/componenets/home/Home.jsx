@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import Settings from './Settings'
 import { zustandStore } from '../../zustand/zustand';
 import Message from '../midlayer/Message';
@@ -9,12 +9,39 @@ import { Bell, Search, Upload } from 'lucide-react';
 import { MdPersonAddAlt } from "react-icons/md";
 import Stories from './Stories';
 import Post from './Post';
+import Connect from './connect/Connect';
+import { UseNotification } from '../../socket/Notification';
+import axios from 'axios';
 
 function Home() {
   const { activeTab, setActiveTab } = zustandStore();
+  const {notification} = UseNotification()
+  const [notificationData, setNotificationData] = useState(null);
+  const [loading,setLoading] = useState(false)
+  
+  useEffect(()=>{
+    const func = async(req,res,next)=>{
+      try{
+        setLoading(true)
+        const result = await axios.get('/api/v1/fetchNotification',{credentials:'include'});
+        setNotificationData(result.data || [])
+      }catch(error){
+        console.log('something seems off...',error)
+      }finally{
+        setLoading(true)
+      }
+    }
+    func();
+
+  },[notification])
+
+  const RedDot = () => (
+    <span className="absolute top-0 right-0 bg-red-500 h-2 w-2 rounded-full"></span>
+  );
+
   return (
     <div className='md:mt-4 mt-10'>
-    <div className="w-full justify-between items-center pl-4 pr-4 pb-4 border-b border-gray-200 md:flex hidden">
+    <div className="w-full justify-between items-center pl-4 pr-4 pb-4 border-b border-gray-200 md:flex hidden pt-2">
   {/* Left: Search */}
   <div className="relative w-1/3">
     <Search className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-500" />
@@ -27,7 +54,11 @@ function Home() {
 
   {/* Right Icons */}
   <div className="flex items-center space-x-6">
-    <Bell className="cursor-pointer" />
+    <div className="relative">
+  <Bell className="w-6 h-6 text-gray-700" />
+  {notificationData && notificationData.length > 0 && <RedDot />}
+</div>
+
     <div className="flex items-center space-x-2 bg-blue-50 px-3 py-2 rounded-full cursor-pointer">
       <span>Upload</span>
       <Upload size={18} />
@@ -43,7 +74,7 @@ function Home() {
   </div>
 </div>
 
-<div className="flex flex-col md:flex-row h-[87vh] md:h-[84vh] ">
+<div className="flex flex-col md:flex-row h-[85vh] md:h-[80vh] ">
   {/* LEFT COLUMN */}
   <div className="flex flex-col w-full md:w-[100%] bg-white overflow-hidden overflow-y-scroll">
     
@@ -59,9 +90,9 @@ function Home() {
     </div>
 
   {/* RIGHT COLUMN - Suggestions */}
-  <div className="hidden md:block md:w-[40%] bg-white p-4 overflow-y-auto">
+  <div className="hidden md:block md:w-[40%] bg-white p-4 overflow-y-auto justify-center items-center">
     <p className="font-bold mb-2">People you may know</p>
-    {/* Friend suggestions go here */}
+    <Connect/>
   </div>
 </div>
     </div>

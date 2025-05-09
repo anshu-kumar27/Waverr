@@ -3,30 +3,30 @@ const User = require("../models/userM");
 const Profile = require("../models/profileM");
 const { getReceiverSocketId, io } = require("../app");
 const ErrorHandler = require("../utils/errorHandler");
-
+const Notification = require('../models/notification')
 //  message section PVT
 
 // this is for temp testing
-exports.getUsersForSideBar = catchAsyncerrors(async(req,res,next)=>{
-    const loggedInuserId = req.user.id;
-    const filteredUsers = await User.find({ _id: { $ne: loggedInuserId } })
-  .select("-password")
-  .sort({ "userLastMessage.createdAt": -1 });
-      
-    // console.log("these are filtered : ",filteredUsers)
-    res.status(200).json({filteredUsers});
-})
-
-
-exports.findFriends = catchAsyncerrors(async(req,res,next)=>{
+exports.getUsersForSideBar = catchAsyncerrors(async (req, res, next) => {
   const loggedInuserId = req.user.id;
-  const profile = await Profile.findOne({user:loggedInuserId});
-  const friends = profile?.friends ?? [];
-  res.status(200).json({friends})
+  const filteredUsers = await User.find({ _id: { $ne: loggedInuserId } })
+    .select("-password")
+    .sort({ "userLastMessage.createdAt": -1 });
+
+  // console.log("these are filtered : ",filteredUsers)
+  res.status(200).json({ filteredUsers });
 })
 
+//  this is to find all the friends
+exports.findFriends = catchAsyncerrors(async (req, res, next) => {
+  const loggedInuserId = req.user.id;
+  const profile = await Profile.findOne({ user: loggedInuserId });
+  const friends = profile?.friends ?? [];
+  res.status(200).json({ friends })
+})
 
-exports.searchForFriends = catchAsyncerrors(async(req,res,next)=>{
+//  this is to search for the freinds includes aggregation pipeline
+exports.searchForFriends = catchAsyncerrors(async (req, res, next) => {
   const { search } = req.body;
   if (!search || search.trim() === "") {
     return next(new ErrorHandler("Search term is required", 400));
@@ -44,7 +44,7 @@ exports.searchForFriends = catchAsyncerrors(async(req,res,next)=>{
       }
     },
     { $unwind: '$userData' },
-  
+
     // Create a custom score for relevance
     {
       $addFields: {
@@ -66,7 +66,7 @@ exports.searchForFriends = catchAsyncerrors(async(req,res,next)=>{
         }
       }
     },
-  
+
     {
       $match: {
         $or: [
@@ -76,21 +76,21 @@ exports.searchForFriends = catchAsyncerrors(async(req,res,next)=>{
         ]
       }
     },
-  
+
     {
       $project: {
         'userData.firstName': 1,
         'userData.avatar': 1,
-        'profileName':1,
+        'profileName': 1,
         matchScore: 1
       }
     },
-  
+
     {
       $sort: { matchScore: -1 }
     }
   ]).allowDiskUse(true);
-  
+
 
   res.status(200).json({ results });
 
@@ -100,84 +100,139 @@ exports.searchForFriends = catchAsyncerrors(async(req,res,next)=>{
 
 
 // find the user for status 
-exports.findStatusUsers = catchAsyncerrors(async(req,res,next)=>{
+exports.findStatusUsers = catchAsyncerrors(async (req, res, next) => {
   const userId = req.user.id;
   const result = await Profile.findOne({ user: userId })
-  .populate({
-    path: 'friends',
-    select: '-password', // hide password from each populated user
-  });
+    .populate({
+      path: 'friends',
+      select: '-password', // hide password from each populated user
+    });
 
-    res.status(200).json({result})
+  res.status(200).json({ result })
 })
 
 
 //  Home
-exports.getUsersForHomeSideBar = catchAsyncerrors(async(req,res,next)=>{
+exports.getUsersForHomeSideBar = catchAsyncerrors(async (req, res, next) => {
   const loggedInuserId = req.user.id;
-  const profile = await Profile.findOne({user : loggedInuserId});
+  const profile = await Profile.findOne({ user: loggedInuserId });
   let friends = profile?.friends ?? [];
   friends.push(loggedInuserId);
-  const filteredUsers = await User.find({_id: {$nin : friends}}).select("-password");
+  const filteredUsers = await User.find({ _id: { $nin: friends } }).select("-password");
 
-  res.status(200).json({filteredUsers});
+  res.status(200).json({ filteredUsers,profile });
 })
 
 //  notifications / home updates 
-
-exports.sendFriendReq = catchAsyncerrors(async(req,res,next)=>{
+exports.sendFriendReq = catchAsyncerrors(async (req, res, next) => {
   const loggedInuserId = req.user.id;
-  const {id: targetUserId} = req.params;
-  
-  const targetProfile = await Profile.findOne({ user: targetUserId });
+  const { id: targetUserId } = req.params;
 
-  if (!targetProfile) return next(new ErrorHandler("profile not found", 404));
-  
-  // checking if friend already exists
-  if (targetProfile.friends.includes(loggedInuserId)) {
+  const user = await User.findById(targetUserId);
+  if (!user) return next(new ErrorHandler("target user not found", 404));
+
+  const senderProfile = await Profile.findOne({ user: loggedInuserId });
+  if (!senderProfile) return next(new ErrorHandler("something went wrong", 404));
+
+  if (senderProfile.friends.includes(targetUserId)) {
     return next(new ErrorHandler("Friend already exists", 400));
   }
-  
-  // checking if there is any friend request already in the queue
-  const existingRequest = targetProfile.friendReqStatus.find(
-    (req) => req.user.toString() === loggedInuserId.toString() &&
-            (req.status === "pending" || req.status === "accepted")
+
+  const existingRequest = senderProfile.friendReqStatus.find(
+    (req) =>
+      req.user.toString() === targetUserId.toString() &&
+      (req.status === "pending" || req.status === "accepted")
   );
-  
   if (existingRequest) {
     return next(new ErrorHandler("Friend request already exists or was accepted", 400));
   }
-  
 
-  // Add new friend request
+  // Add request to target user’s profile
   const updatedProfile = await Profile.findOneAndUpdate(
-    { user: targetUserId },
+    { user: loggedInuserId },
     {
       $addToSet: {
         friendReqStatus: {
-          user: loggedInuserId,
-          status: "pending"
+          user: targetUserId,
+          status: "pending",
+        },
+      },
+    },
+    { new: true }
+  );
+
+  if (!updatedProfile) return next(new ErrorHandler("Target profile not found", 404));
+
+  // Create and populate the notification
+  const notification = await Notification.create({
+    user: targetUserId,
+    sender: loggedInuserId,
+    type: "friendRequest",
+    status: "active",
+  });
+
+  const populatedNotification = await Notification.findById(notification._id)
+    .populate({ path: "sender", select: "-password" }).sort({ _id: -1 });
+
+  // Emit socket event
+  const receiverSocketId = getReceiverSocketId(targetUserId);
+  if (receiverSocketId && io) {
+    io.to(receiverSocketId).emit("newReq", populatedNotification);
+  }
+
+  res.status(200).json({ notification: populatedNotification });
+});
+
+exports.removeFriendReq = catchAsyncerrors(async (req, res, next) => {
+  const userId = req.user.id;
+  const { id: targetUserId } = req.params;
+  const updatedProfile = await Profile.findOneAndUpdate(
+    { user: userId },
+    {
+      $pull: {
+        friendReqStatus: {
+          user: targetUserId
         }
       }
     },
     { new: true }
   );
 
-  const newRequest = updatedProfile.friendReqStatus.find(
-    (req) => req.user.toString() === loggedInuserId.toString()
+  if (!updatedProfile) {
+    return next(new ErrorHandler("Friend request not found", 404));
+  }
+  await Notification.findOneAndDelete(
+    {
+      user: targetUserId,
+      sender: userId,
+      type: "friendRequest",
+      status: "active"
+    },
   );
 
-  const receiverSocketId = getReceiverSocketId(receiverId);
+  const receiverSocketId = getReceiverSocketId(targetUserId);
   if (receiverSocketId && io) {
-    io.to(receiverSocketId).emit("newReq", newRequest);
+    io.to(receiverSocketId).emit("removeReq", "restart");
   }
-
-  res.status(200).json({newRequest})
-
+  res.status(200).json({ status: "sucess" })
 })
 
 
-exports.updateStatusOfFriend = catchAsyncerrors(async(req,res,next)=>{
+
+exports.updateStatusOfFriend = catchAsyncerrors(async (req, res, next) => {
   const loggedInuserId = req.user.id;
-  const profile = await Profile.findOne({user:loggedInuserId});
+  const profile = await Profile.findOne({ user: loggedInuserId });
+})
+
+
+
+
+
+
+// notification bar
+exports.fetchNotifications = catchAsyncerrors(async(req,res,next)=>{
+  const userId = req.user.id;
+  const fetchNotifications = await Notification.find({user:userId , status : 'active'}).sort({_id:-1})
+  const result = fetchNotifications.length === 0 ? [] : fetchNotifications;
+  res.status(200).json(result)
 })
