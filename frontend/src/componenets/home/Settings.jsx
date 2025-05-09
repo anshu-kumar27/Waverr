@@ -3,7 +3,7 @@ import wavierrLogo from "../../assets/waverr.svg";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { logout } from "../../action/userAction";
-import { FiX } from "react-icons/fi";
+import { FiPhoneCall, FiX } from "react-icons/fi";
 
 import {
   FiMessageCircle,
@@ -185,7 +185,7 @@ useEffect(() => {
       </div>
 
       <FiMessageCircle className="text-xl hover:text-blue-500 transition-all duration-200 cursor-pointer"  onClick={()=> navigate('/message')}/>
-      <FiUser className="text-2xl hover:text-blue-500 transition-all duration-200 cursor-pointer" onClick={()=> navigate('/group')}/>
+      <FiPhoneCall className="text-2xl hover:text-blue-500 transition-all duration-200 cursor-pointer" onClick={()=> navigate('/call')}/>
       </div>}
        
     </>

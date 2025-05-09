@@ -5,10 +5,31 @@ const profileSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true,
-    unique: true // One-to-one mapping with User
+    unique: true
+  },
+  profileName:{
+    type:String,
+    unique:true,
   },
   friends: [
     { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
+  ],
+  friendReqStatus: [
+    {
+      user : {
+        type:mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+      },
+      status:{
+        type : String,
+        enum : ['pending','accepted','rejected'],
+        default : 'pending'
+      },
+      requestedAt: {
+        type: Date,
+        default: Date.now
+      }
+    }
   ],
   blockedUsers: [
     { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
