@@ -218,21 +218,62 @@ exports.removeFriendReq = catchAsyncerrors(async (req, res, next) => {
 })
 
 
+//  updating friend Req -> gonna take accept / reject clear notification / add ids in both of the lists
+exports.updateFriendReq = catchAsyncerrors(async (req, res, next) => {
+  const userId = req.user.id;
+  const {id: targetId} = req.params;
+  const {userDecision = null} = req.body; // accept or reject : this will be auto reject
 
-exports.updateStatusOfFriend = catchAsyncerrors(async (req, res, next) => {
-  const loggedInuserId = req.user.id;
-  const profile = await Profile.findOne({ user: loggedInuserId });
+  await Profile.findOneAndUpdate(
+    { user: targetId },
+    {
+      $pull: {
+        friendReqStatus: {
+          user: userId
+        }
+      }
+    },
+    { new: true }
+    )
+  
+  if(userDecision === 'accept'){
+    await Profile.updateOne(
+      { user: userId },
+      { $addToSet: { friends: targetId } } // addToSet avoids duplicates
+    );
+  
+    await Profile.updateOne(
+      { user: targetId },
+      { $addToSet: { friends: userId } }
+    );
+  }
+
+  await Notification.findOneAndDelete(
+    {
+      user: userId,
+      sender: targetId,
+      type: "friendRequest",
+      status: "active"
+    },
+  );
+
+  const receiverSocketId = getReceiverSocketId(targetId);
+  if (receiverSocketId && io) {
+    io.to(receiverSocketId).emit("removeReq", "restart");
+  }
+  const senderSocketId = getReceiverSocketId(userId);
+  if (senderSocketId && io) {
+    io.to(senderSocketId).emit("removeReq", "restart");
+  }
+  res.status(200).json({ status: "success" })
 })
-
-
-
 
 
 
 // notification bar
 exports.fetchNotifications = catchAsyncerrors(async(req,res,next)=>{
   const userId = req.user.id;
-  const fetchNotifications = await Notification.find({user:userId , status : 'active'}).sort({_id:-1}).populate({path:'user',select:'-password'})
+  const fetchNotifications = await Notification.find({user:userId , status : 'active'}).sort({_id:-1}).populate({path:'sender',select:'-password'})
   const result = fetchNotifications.length === 0 ? [] : fetchNotifications;
   res.status(200).json(result)
 })

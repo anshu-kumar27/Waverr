@@ -3,11 +3,13 @@ import Loading from '../../../loading/Loading';
 import React, { useEffect, useState } from 'react'
 import { toast, ToastContainer } from 'react-toastify';
 import ConnectSkeleton from './ConnectSkeleton';
+import { UseNotification } from '../../../socket/Notification';
 
 function Connect() {
     const [loading,setLoading] = useState(false);
     const [addNetwork,setAddNetwork] = useState([]);
     const [profile , setProfile] = useState(null);
+    const {notification} = UseNotification()
     useEffect(()=>{
         const func = async() =>{
             try{
@@ -23,7 +25,7 @@ function Connect() {
             }
         }
         func();
-    },[])
+    },[notification])
   return (
     <>
   {loading ? (

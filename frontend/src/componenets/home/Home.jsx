@@ -35,8 +35,7 @@ function Home() {
     func();
 
   },[notification])
-  const dropdownRef = useRef(null); // Reference for the entire dropdown and bell
-  const bellRef = useRef(null);     // Optional: separate bell ref if needed
+  const dropdownRef = useRef(null);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
