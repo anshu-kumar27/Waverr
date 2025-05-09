@@ -20,7 +20,6 @@ import ShowProfile from './componenets/home/profile/ShowProfile';
 import UploadImage from './componenets/home/profile/UploadImage';
 import Loading from './loading/Loading';
 import { UseNotification } from './socket/Notification';
-
 function App() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -66,6 +65,7 @@ function App() {
       };
       
       const handleNewReq = (data) => {
+        new Audio("/sounds/notify.mp3").play();
         console.log('got a new notification',data);
         setNotification(Date.now());
       }
