@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import Settings from './Settings'
 import { zustandStore } from '../../zustand/zustand';
 import Message from '../midlayer/Message';
@@ -12,13 +12,14 @@ import Post from './Post';
 import Connect from './connect/Connect';
 import { UseNotification } from '../../socket/Notification';
 import axios from 'axios';
+import NotificationDropdown from './notification/NotificationDropdown';
 
 function Home() {
   const { activeTab, setActiveTab } = zustandStore();
   const {notification} = UseNotification()
   const [notificationData, setNotificationData] = useState(null);
   const [loading,setLoading] = useState(false)
-  
+  const [showDropdown, setShowDropdown] = useState(false); // <- toggle
   useEffect(()=>{
     const func = async(req,res,next)=>{
       try{
@@ -34,6 +35,22 @@ function Home() {
     func();
 
   },[notification])
+  const dropdownRef = useRef(null); // Reference for the entire dropdown and bell
+  const bellRef = useRef(null);     // Optional: separate bell ref if needed
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target)
+      ) {
+        setShowDropdown(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const RedDot = () => (
     <span className="absolute top-0 right-0 bg-red-500 h-2 w-2 rounded-full"></span>
@@ -54,10 +71,21 @@ function Home() {
 
   {/* Right Icons */}
   <div className="flex items-center space-x-6">
-    <div className="relative">
-  <Bell className="w-6 h-6 text-gray-700" />
-  {notificationData && notificationData.length > 0 && <RedDot />}
-</div>
+  <div className="relative" ref={dropdownRef}>
+      <div
+        onClick={() => setShowDropdown((prev) => !prev)}
+        className="cursor-pointer relative"
+      >
+        <Bell className="w-6 h-6 text-gray-700" />
+        {notificationData && notificationData.length > 0 && (
+          <span className="absolute top-0 right-0 w-2.5 h-2.5 bg-red-600 rounded-full" />
+        )}
+      </div>
+
+      {showDropdown && (
+        <NotificationDropdown notifications={notificationData} />
+      )}
+    </div>
 
     <div className="flex items-center space-x-2 bg-blue-50 px-3 py-2 rounded-full cursor-pointer">
       <span>Upload</span>

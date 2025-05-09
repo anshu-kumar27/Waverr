@@ -232,7 +232,7 @@ exports.updateStatusOfFriend = catchAsyncerrors(async (req, res, next) => {
 // notification bar
 exports.fetchNotifications = catchAsyncerrors(async(req,res,next)=>{
   const userId = req.user.id;
-  const fetchNotifications = await Notification.find({user:userId , status : 'active'}).sort({_id:-1})
+  const fetchNotifications = await Notification.find({user:userId , status : 'active'}).sort({_id:-1}).populate({path:'user',select:'-password'})
   const result = fetchNotifications.length === 0 ? [] : fetchNotifications;
   res.status(200).json(result)
 })
