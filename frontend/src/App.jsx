@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import './App.css'
 import MainAuth from './componenets/auth/MainAuth';
 import {BrowserRouter as Router , Routes , Route, useNavigate, useLocation} from 'react-router-dom'
@@ -52,6 +52,25 @@ function App() {
     }
   }, [isAuthenticated]);
   
+  const audioUnlocked = useRef(false);
+
+  useEffect(() => {
+    const unlockAudio = () => {
+      // Try to play any silent audio to "unlock" audio permission
+      const silentAudio = new Audio("/sounds/notify.mp3");
+      silentAudio.volume = 0;
+      silentAudio.play().catch(() => {});
+      audioUnlocked.current = true;
+      window.removeEventListener("click", unlockAudio);
+    };
+
+    window.addEventListener("click", unlockAudio);
+
+    return () => {
+      window.removeEventListener("click", unlockAudio);
+    };
+  }, []);
+
   
   useEffect(()=>{
     if(!socket) return;
@@ -65,7 +84,9 @@ function App() {
       };
       
       const handleNewReq = (data) => {
-        new Audio("/sounds/notify.mp3").play();
+        if (audioUnlocked.current) {
+          new Audio("/sounds/notify.mp3").play().catch((err) => console.warn("Play failed", err));
+        }    
         console.log('got a new notification',data);
         setNotification(Date.now());
       }

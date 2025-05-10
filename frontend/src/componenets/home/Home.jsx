@@ -101,7 +101,7 @@ function Home() {
   </div>
 </div>
 
-<div className="flex flex-col md:flex-row h-[85vh] md:h-[80vh] ">
+<div className="flex flex-col md:flex-row h-[85vh] md:h-[84vh] ">
   {/* LEFT COLUMN */}
   <div className="flex flex-col w-full md:w-[100%] bg-white overflow-hidden overflow-y-scroll">
     

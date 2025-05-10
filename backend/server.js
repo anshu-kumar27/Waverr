@@ -1,6 +1,6 @@
 // env setup
 const dotenv = require('dotenv');
-dotenv.config({ path: './config/config.env' })
+dotenv.config()
 
 const connectDatabase = require('./config/database')
 const errorMiddleware = require('./middleware/error');
@@ -31,6 +31,7 @@ const sidebarRoutes = require('./routes/sidebarR');
 const sendMessages = require('./routes/messageR');
 const profiles = require('./routes/profileR');
 const calls = require('./routes/callR');
+const posts = require('./routes/post.route')
 
 app.use('/api/v1', users);
 app.use('/', googleAuthRoutes);
@@ -38,6 +39,7 @@ app.use('/api/v1', sidebarRoutes);
 app.use('/api/v1', sendMessages);
 app.use('/api/v1', profiles);
 app.use('/api/v1', calls);
+app.use('/api/v1',posts);
 
 // Error middleware
 app.use(errorMiddleware);

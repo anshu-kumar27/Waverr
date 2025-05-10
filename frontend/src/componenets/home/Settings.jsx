@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import wavierrLogo from "../../assets/waverr.svg";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -18,10 +18,13 @@ import {
   FiUser
 } from "react-icons/fi";
 import { FaPen } from "react-icons/fa";
-
+import { Bell } from 'lucide-react';
 
 
 import { zustandStore } from "../../zustand/zustand";
+import NotificationDropdown from "./notification/NotificationDropdown";
+import { UseNotification } from "../../socket/Notification";
+import axios from "axios";
 
 function Settings() {
   const dispatch = useDispatch();
@@ -29,7 +32,7 @@ function Settings() {
   const { user } = useSelector((state) => state.user);
   const [menuOpen, setMenuOpen] = useState(false);
   const toggleMenu = () => setMenuOpen(!menuOpen);
-  const {selectedConversation} = zustandStore();
+  const { selectedConversation } = zustandStore();
 
   const handleLogout = async () => {
     console.log("handled logout and navigated to : /auth");
@@ -37,27 +40,67 @@ function Settings() {
     navigate("/auth");
   };
   const [showBottomMenu, setShowBottomMenu] = useState(true);
-const [lastScrollY, setLastScrollY] = useState(0);
+  const [lastScrollY, setLastScrollY] = useState(0);
 
-useEffect(() => {
-  const handleScroll = () => {
-    const currentScrollY = window.scrollY;
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
 
-    if (currentScrollY > lastScrollY) {
-      // Scrolling down
-      setShowBottomMenu(false);
-    } else {
-      // Scrolling up
-      setShowBottomMenu(true);
+      if (currentScrollY > lastScrollY) {
+        // Scrolling down
+        setShowBottomMenu(false);
+      } else {
+        // Scrolling up
+        setShowBottomMenu(true);
+      }
+
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [lastScrollY]);
+
+
+  // notification 
+
+  const { notification } = UseNotification()
+  const [notificationData, setNotificationData] = useState(null);
+  const [loading, setLoading] = useState(false)
+  const [showDropdown, setShowDropdown] = useState(false); // <- toggle
+  useEffect(() => {
+    const func = async (req, res, next) => {
+      try {
+        setLoading(true)
+        const result = await axios.get('/api/v1/fetchNotification', { credentials: 'include' });
+        setNotificationData(result.data || [])
+        console.log("notifications for phone")
+      } catch (error) {
+        console.log('something seems off...', error)
+      } finally {
+        setLoading(true)
+      }
     }
+    func();
 
-    setLastScrollY(currentScrollY);
-  };
+  }, [notification])
+  const dropdownRef = useRef(null);
 
-  window.addEventListener('scroll', handleScroll);
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target)
+      ) {
+        setShowDropdown(false);
+      }
+    };
 
-  return () => window.removeEventListener('scroll', handleScroll);
-}, [lastScrollY]);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   return (
     <>
       <div className="hidden md:flex justify-center py-6 h-[100vh] w-full">
@@ -115,30 +158,49 @@ useEffect(() => {
         </div>
       </div>
       <div className="md:hidden absolute top-4 right-4 z-50">
-        <button onClick={toggleMenu}>
           {!menuOpen ? (
-            <svg
-              className="w-6 h-6 text-gray-800"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M4 6h16M4 12h16M4 18h16"
-              />
-            </svg>
+            <div className="flex flex-row">
+
+              <div className=" pr-5" ref={dropdownRef}>
+                <div
+                  onClick={() => setShowDropdown((prev) => !prev)}
+                  className="cursor-pointer relative"
+                >
+                  <Bell className="w-6 h-6 text-gray-700" />
+                  {notificationData && notificationData.length > 0 && (
+                    <span className="absolute top-0 right-0 w-2.5 h-2.5 bg-red-600 rounded-full" />
+                  )}
+                </div>
+
+                {showDropdown && (
+                  <NotificationDropdown notifications={notificationData} />
+                )}
+              </div>
+              <div onClick={toggleMenu}>
+                <svg
+                  className="w-6 h-6 text-gray-800"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M4 6h16M4 12h16M4 18h16"
+                  />
+                </svg>
+              </div>
+
+            </div>
           ) : (
-            <div>
+            <div onClick={toggleMenu}>
               <FiX
                 className="text-2xl cursor-pointer hover:text-red-600"
                 title="Close"
               />
             </div>
           )}
-        </button>
       </div>
       {menuOpen && (
         <div className="md:hidden absolute  bg-white z-40 h-[100vh] flex w-full justify-center items-center p-6 gap-6">
@@ -175,19 +237,19 @@ useEffect(() => {
           </ul>
         </div>
       )}
-      {!showBottomMenu || menuOpen || selectedConversation ? null : 
-      <div className="md:hidden absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-white/80 backdrop-blur-md shadow-lg rounded-3xl px-6 py-4 flex items-center justify-center gap-6 z-50">
-      <FiHome className="text-2xl hover:text-blue-500 transition-all duration-200 cursor-pointer" onClick={()=> navigate('/')} />
-      <FiSearch className="text-2xl hover:text-blue-500 transition-all duration-200 cursor-pointer" onClick={()=> navigate('/search')}/>
-  
-      <div className="w-14 h-10 flex items-center justify-center rounded-full bg-blue-500 text-white shadow-md hover:bg-blue-600 transition-all duration-200 cursor-pointer">
-    <FiPlusSquare className="text-xl" />
-      </div>
+      {!showBottomMenu || menuOpen || selectedConversation ? null :
+        <div className="md:hidden absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-white/80 backdrop-blur-md shadow-lg rounded-3xl px-6 py-4 flex items-center justify-center gap-6 z-50">
+          <FiHome className="text-2xl hover:text-blue-500 transition-all duration-200 cursor-pointer" onClick={() => navigate('/')} />
+          <FiSearch className="text-2xl hover:text-blue-500 transition-all duration-200 cursor-pointer" onClick={() => navigate('/search')} />
 
-      <FiMessageCircle className="text-xl hover:text-blue-500 transition-all duration-200 cursor-pointer"  onClick={()=> navigate('/message')}/>
-      <FiPhoneCall className="text-2xl hover:text-blue-500 transition-all duration-200 cursor-pointer" onClick={()=> navigate('/call')}/>
-      </div>}
-       
+          <div className="w-14 h-10 flex items-center justify-center rounded-full bg-blue-500 text-white shadow-md hover:bg-blue-600 transition-all duration-200 cursor-pointer">
+            <FiPlusSquare className="text-xl" />
+          </div>
+
+          <FiMessageCircle className="text-xl hover:text-blue-500 transition-all duration-200 cursor-pointer" onClick={() => navigate('/message')} />
+          <FiPhoneCall className="text-2xl hover:text-blue-500 transition-all duration-200 cursor-pointer" onClick={() => navigate('/call')} />
+        </div>}
+
     </>
   );
 }

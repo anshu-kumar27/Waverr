@@ -1,14 +1,10 @@
 const mongoose = require('mongoose');
-const userM = require('../models/userM');
 
 const connectDatabase =async()=>{
     try{
         mongodbUrl = process?.env?.DB_URI ?? "mongodb://localhost:27017/Waverr"; // redirecting to localhost for testing
         const data = await mongoose.connect(mongodbUrl);
         console.log(`MongoDB connected with the server: ${mongodbUrl}`);
-
-        await userM.init();
-        console.log("User model indexes ensured. ")
 
     }catch(err){
         console.log('MongoDB Connection error : ',err);

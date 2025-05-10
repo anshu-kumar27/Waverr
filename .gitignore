@@ -3,3 +3,6 @@ frontend/node_modules
 ref/
 backend/.gitignore
 zanalysis
+.env
+backend/.env
+frontend/.env

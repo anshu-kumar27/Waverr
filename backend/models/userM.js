@@ -58,11 +58,6 @@ const userSchema = new mongoose.Schema({
         }
 }, { timestamps: true });
 
-//creating indexes
-userSchema.index({ email: 1 }, { unique: true });
-userSchema.index({ googleId: 1 }, { unique: true, sparse: true });
-userSchema.index({ appleId: 1 }, { unique: true, sparse: true });
-
 //hashing the passwords 
 userSchema.pre("save", async function (next) {
     if (!this.isModified('password') || !this.password) {

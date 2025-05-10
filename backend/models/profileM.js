@@ -7,23 +7,25 @@ const profileSchema = new mongoose.Schema({
     required: true,
     unique: true
   },
-  profileName:{
-    type:String,
-    unique:true,
+  profileName: {
+    type: String,
   },
+  posts: [
+    { type: mongoose.Schema.Types.ObjectId, ref: 'Post' }
+  ],
   friends: [
     { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
   ],
   friendReqStatus: [
     {
-      user : {
-        type:mongoose.Schema.Types.ObjectId,
+      user: {
+        type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
       },
-      status:{
-        type : String,
-        enum : ['pending','accepted','rejected','removed'],
-        default : 'pending'
+      status: {
+        type: String,
+        enum: ['pending', 'accepted', 'rejected', 'removed'],
+        default: 'pending'
       },
       requestedAt: {
         type: Date,
@@ -63,11 +65,11 @@ const profileSchema = new mongoose.Schema({
     enum: ['male', 'female', 'other'],
     default: 'other'
   },
-  story:{
+  story: {
     type: String,
   },
-  statusText:{
-    type:String,
+  statusText: {
+    type: String,
     minLength: [1, 'Status must be at least 1 character long.'],
     maxLength: [20, 'Status cannot exceed 20 characters.']
   },

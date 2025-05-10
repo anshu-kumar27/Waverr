@@ -103,7 +103,7 @@ exports.updateUserProfile = catchAsync(async (req, res, next) => {
       profile.birthday = new Date(req.body.birthday);
     }
   
-    // Optional cloudinary avatar upload
+    // cloudinary avatar upload
     if (req.body.avatar) {
       const uploadResponse = await cloudinary.uploader.upload(req.body.avatar, {
         folder: 'avatars'
@@ -111,9 +111,9 @@ exports.updateUserProfile = catchAsync(async (req, res, next) => {
       profile.avatars.push({
         url: uploadResponse.secure_url,
         uploadedAt: new Date()
-      });
+        });
     }
-  
+    
     await profile.save();
   
     res.status(200).json({
