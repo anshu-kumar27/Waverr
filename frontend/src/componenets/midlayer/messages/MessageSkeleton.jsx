@@ -36,7 +36,8 @@ function MessageSkeleton({userId, userAvatar, userName }) {
 
   useEffect(() => {
     setSelectedConversation(userId)
-    if (onlineUsers.includes(selectedConversation))
+
+    if (onlineUsers.includes(userId))
       setOnlineStatus("Online")
     else
       setOnlineStatus("Offline")
